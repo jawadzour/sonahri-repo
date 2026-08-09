@@ -23,7 +23,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase: shds-db
+        fromDatabase:
+          name: shds-db
+          property: connectionString
       - key: VITE_SHDS_API_URL
         value: https://shds-backend.onrender.com/api/v1/public
       - key: JWT_SECRET
@@ -55,7 +57,9 @@ services:
       - key: FLASK_APP
         value: wsgi.py
       - key: DATABASE_URL
-        fromDatabase: shds-backend-db
+        fromDatabase:
+          name: shds-backend-db
+          property: connectionString
       - key: CORS_ORIGINS
         value: https://shds-website.onrender.com,https://shds-admin.onrender.com
       - key: BACKEND_BASE_URL
