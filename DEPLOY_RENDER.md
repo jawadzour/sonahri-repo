@@ -42,6 +42,12 @@ Keep both connection strings handy for step 2.
 - Render detects `render.yaml` and shows a plan to create all three
   services (no databases — those are on Neon now).
 
+(Alternative: all three services can also be created directly via
+Render's REST API — `POST /v1/services` once per service, mirroring
+the fields in `render.yaml` — if you'd rather script it than click
+through the dashboard. There's no API endpoint to trigger a Blueprint
+sync directly; `/v1/blueprints` is read-only.)
+
 ## 2) Fill in the secrets it asks for
 
 Every env var marked `sync: false` in `render.yaml` gets prompted for
@@ -60,30 +66,43 @@ repo). Have these ready:
 Everything else (the cross-service URLs, `NODE_ENV`, `APP_CONFIG`,
 etc.) is already wired up in `render.yaml`.
 
-## 3) What happens automatically on deploy
+## 3) What happens automatically on deploy — and what doesn't (free tier)
 
-- `shds-website`: `pnpm install --prod=false && pnpm build`, then
-  `pnpm exec drizzle-kit migrate` (applies committed migrations from
-  `drizzle/` against the Neon `shds-db` database) before starting with
-  `pnpm start`.
-- `shds-backend`: builds from `shds-backend/Dockerfile`, then runs
-  `flask db upgrade` (applies Alembic migrations from
-  `shds-backend/migrations/` against the Neon `shds-backend-db`
-  database) before starting `gunicorn`.
-- `shds-admin`: builds as a static site and serves `shds-admin/dist`.
+`render.yaml` defines `preDeployCommand` for both `shds-website`
+(`pnpm exec drizzle-kit migrate`) and `shds-backend` (`flask db
+upgrade`) to apply migrations before each deploy. **`preDeployCommand`
+is a paid-plan-only feature** — Render silently ignores it on `plan:
+free` services, so migrations do NOT run automatically here. Likewise,
+**Shell/SSH access is also paid-only**, so you can't just open a shell
+on the live service to run one-off commands the way you normally
+would.
+
+The workaround: since both Neon databases are reachable from anywhere
+on the internet (not just from Render), run migrations **locally**,
+pointing at the production connection strings, before or right after
+each deploy that changes the schema:
+
+```bash
+# Main site — from the repo root
+DATABASE_URL="<shds-db pooled connection string>" pnpm exec drizzle-kit migrate
+
+# Flask backend — from shds-backend/, with the venv active
+DATABASE_URL="<shds-backend-db pooled connection string>" APP_CONFIG=production FLASK_APP=wsgi.py python -m flask db upgrade
+```
+
+`shds-admin` has no database/migration step — it's a static build.
 
 ## 4) One manual step: create the first shds-backend admin
 
-`flask db upgrade` creates the schema but not an admin user — that
-command is interactive. After `shds-backend` is live, open its
-**Shell** tab in the Render dashboard and run:
+Same constraint as above — no Shell access on free tier, so run this
+locally too, pointing at the production `shds-backend-db`:
 
 ```bash
-flask create-admin
+cd shds-backend
+DATABASE_URL="<shds-backend-db pooled connection string>" APP_CONFIG=production FLASK_APP=wsgi.py python -m flask create-admin --name "Admin" --email "you@example.com" --password "yourpassword"
 ```
 
-It'll prompt for name/email/password. This is the login for the
-`shds-admin` panel.
+This is the login for the `shds-admin` panel.
 
 The main site's own `/admin/login` uses `ADMIN_EMAIL` /
 `ADMIN_PASSWORD_HASH` instead — no extra step needed there.
@@ -115,6 +134,16 @@ The main site's own `/admin/login` uses `ADMIN_EMAIL` /
   or restart. If that matters, upgrade `shds-backend` to a paid Render
   plan and add a `disk:` block (see git history for the exact config
   that was removed to hit $0/month).
+- **No `preDeployCommand` or Shell access**: both are paid-only — see
+  section 3/4 above for the workaround (run migrations/admin-creation
+  locally against the production Neon connection strings instead).
+- **Memory is tight (512MB)**: `shds-backend/gunicorn.conf.py` computes
+  a worker count from `cpu_count() * 2 + 1`, which reflects the *host*
+  machine's cores on a shared platform like Render, not this
+  container's actual allocation — left uncapped it spawns enough
+  gunicorn workers to OOM-crash before the first request. It's capped
+  at 4 by default; override with the `GUNICORN_WORKERS` env var if you
+  need to tune it further for your plan.
 
 ## Notes & troubleshooting
 

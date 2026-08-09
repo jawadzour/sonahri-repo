@@ -4,7 +4,11 @@ import multiprocessing
 import os
 
 bind = f"0.0.0.0:{os.getenv('PORT', 5000)}"
-workers = int(os.getenv("GUNICORN_WORKERS", multiprocessing.cpu_count() * 2 + 1))
+# Capped at 4: `cpu_count() * 2 + 1` reports the *host's* core count on
+# shared/containerized platforms (e.g. Render's free tier), not the
+# container's actual CPU/memory allocation - on a 512MB instance that
+# formula spawns enough workers to OOM before the first request lands.
+workers = int(os.getenv("GUNICORN_WORKERS", min(multiprocessing.cpu_count() * 2 + 1, 4)))
 worker_class = "sync"
 timeout = 30
 graceful_timeout = 30
