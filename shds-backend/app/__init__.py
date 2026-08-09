@@ -7,7 +7,7 @@ import logging
 from flask import Flask
 
 from app.config import get_config
-from app.extensions import cors, db, jwt, limiter, ma, mail, migrate
+from app.extensions import cors, db, jwt, limiter, ma, migrate
 
 
 def create_app(config_name: str | None = None) -> Flask:
@@ -35,7 +35,6 @@ def _init_extensions(app: Flask) -> None:
     jwt.init_app(app)
     ma.init_app(app)
     limiter.init_app(app)
-    mail.init_app(app)
 
     cors.init_app(
         app,

@@ -64,23 +64,19 @@ services:
         value: https://shds-admin.onrender.com
       - key: UPLOAD_FOLDER
         value: uploads
+      - key: GUNICORN_WORKERS
+        value: "2"
       - key: MAIL_ENABLED
         value: "true"
-      - key: MAIL_SERVER
-        value: smtp.gmail.com
-      - key: MAIL_PORT
-        value: "587"
-      - key: MAIL_USE_TLS
-        value: "true"
-      - key: MAIL_USERNAME
+      - key: BREVO_SENDER_EMAIL
         value: jawadzour786@gmail.com
-      - key: MAIL_DEFAULT_SENDER
-        value: jawadzour786@gmail.com
+      - key: BREVO_SENDER_NAME
+        value: SHDS
       - key: SECRET_KEY
         sync: false
       - key: JWT_SECRET_KEY
         sync: false
-      - key: MAIL_PASSWORD
+      - key: BREVO_API_KEY
         sync: false
 
   # --- Standalone admin panel (static React SPA) ---

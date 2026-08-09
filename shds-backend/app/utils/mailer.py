@@ -1,28 +1,33 @@
 """
-Email sending utility.
+Email sending utility, via Brevo's HTTP transactional email API.
 
-send_email() is safe to call even before real SMTP credentials exist:
-if MAIL_ENABLED is False (the default) or credentials are missing, it
-logs what *would* have been sent instead of raising — so feature code
-(contact form, volunteer signup) can call it unconditionally without
-needing to know whether email is configured yet.
+Not plain SMTP: Render blocks outbound traffic to SMTP ports (25/465/587)
+on free-tier web services to prevent abuse, so Gmail-SMTP-style sending
+doesn't work there. Brevo's API sends over HTTPS instead, which isn't
+blocked, and its free tier just needs one verified sender address (no
+domain/DNS ownership required) to send to any recipient.
 
-To actually send emails: set MAIL_ENABLED=True and fill in MAIL_SERVER /
-MAIL_USERNAME / MAIL_PASSWORD / MAIL_DEFAULT_SENDER in .env. For Gmail,
-MAIL_USERNAME is the Gmail address and MAIL_PASSWORD must be a 16-character
-Google "App Password" (not the regular account password).
+send_email() is safe to call even before real credentials exist: if
+MAIL_ENABLED is False (the default) or BREVO_API_KEY is missing, it logs
+what *would* have been sent instead of raising — so feature code (contact
+form, volunteer signup) can call it unconditionally without needing to
+know whether email is configured yet.
+
+To actually send emails: set MAIL_ENABLED=True, BREVO_API_KEY (from
+Brevo's dashboard → SMTP & API → API Keys), and BREVO_SENDER_EMAIL (must
+be verified in Brevo via Single Sender Verification) in .env.
 """
 
 from __future__ import annotations
 
 import logging
 
+import requests
 from flask import current_app
-from flask_mail import Message
-
-from app.extensions import mail
 
 logger = logging.getLogger(__name__)
+
+BREVO_SEND_URL = "https://api.brevo.com/v3/smtp/email"
 
 
 def send_email(to: str, subject: str, body: str, html: str | None = None) -> bool:
@@ -31,13 +36,29 @@ def send_email(to: str, subject: str, body: str, html: str | None = None) -> boo
         logger.info("MAIL_ENABLED is False — skipping email to %s: %s", to, subject)
         return False
 
-    if not current_app.config.get("MAIL_USERNAME") or not current_app.config.get("MAIL_PASSWORD"):
-        logger.warning("Email is enabled but MAIL_USERNAME/MAIL_PASSWORD are not set — skipping.")
+    api_key = current_app.config.get("BREVO_API_KEY")
+    sender_email = current_app.config.get("BREVO_SENDER_EMAIL")
+    if not api_key or not sender_email:
+        logger.warning("Email is enabled but BREVO_API_KEY/BREVO_SENDER_EMAIL are not set — skipping.")
         return False
 
+    payload = {
+        "sender": {"email": sender_email, "name": current_app.config.get("BREVO_SENDER_NAME", "SHDS")},
+        "to": [{"email": to}],
+        "subject": subject,
+        "textContent": body,
+    }
+    if html:
+        payload["htmlContent"] = html
+
     try:
-        message = Message(subject=subject, recipients=[to], body=body, html=html)
-        mail.send(message)
+        response = requests.post(
+            BREVO_SEND_URL,
+            json=payload,
+            headers={"api-key": api_key, "Content-Type": "application/json"},
+            timeout=10,
+        )
+        response.raise_for_status()
         return True
     except Exception:
         logger.exception("Failed to send email to %s", to)

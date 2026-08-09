@@ -79,14 +79,12 @@ class BaseConfig:
     BACKEND_BASE_URL = os.getenv("BACKEND_BASE_URL", "http://localhost:5000")
     ADMIN_FRONTEND_URL = os.getenv("ADMIN_FRONTEND_URL", "http://localhost:5174")
     
-    # --- Email (confirmation emails) ---
+    # --- Email (confirmation emails, sent via Brevo's HTTP API — see
+    # app/utils/mailer.py for why not plain SMTP) ---
     MAIL_ENABLED = os.getenv("MAIL_ENABLED", "False").lower() in {"1", "true", "yes"}
-    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
-    MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
-    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", "True").lower() in {"1", "true", "yes"}
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
-    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", MAIL_USERNAME)
+    BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+    BREVO_SENDER_EMAIL = os.getenv("BREVO_SENDER_EMAIL")
+    BREVO_SENDER_NAME = os.getenv("BREVO_SENDER_NAME", "SHDS")
 
     # --- Pagination defaults (used later by feature endpoints) ---
     DEFAULT_PAGE_SIZE = 20

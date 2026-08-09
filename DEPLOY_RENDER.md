@@ -35,6 +35,22 @@ postgresql://<user>:<password>@<host>-pooler.<region>.aws.neon.tech/<dbname>?ssl
 
 Keep both connection strings handy for step 2.
 
+### Email: Brevo, not SMTP
+
+Render blocks outbound traffic to SMTP ports (25/465/587) on free-tier
+web services, so Gmail-SMTP-style sending (what this project used
+originally) doesn't work once deployed there. `shds-backend` sends
+email via [Brevo](https://brevo.com)'s HTTP API instead — HTTPS isn't
+blocked, and Brevo's free tier (300 emails/day, no credit card) only
+needs one verified sender address, not a whole domain:
+
+1. Sign up at [brevo.com](https://brevo.com)
+2. **Senders & IP** → **Senders** → add and verify a sender email
+   (click the confirmation link Brevo emails you)
+3. **SMTP & API** → **API Keys** → generate a new key
+
+Keep the API key and the verified sender email handy for step 2.
+
 ## 1) Deploy via Blueprint
 
 - Render Dashboard → **New** → **Blueprint** → connect the
@@ -60,8 +76,8 @@ repo). Have these ready:
   locally with `node scripts/generate-password-hash.mjs "yourpassword"`.
 - **`shds-backend`**: `DATABASE_URL` (the `shds-backend-db` Neon pooled
   connection string), `SECRET_KEY`, `JWT_SECRET_KEY` (any long random
-  strings, different from each other), `MAIL_PASSWORD` (a Gmail App
-  Password — see `shds-backend/.env.example` for how to generate one).
+  strings, different from each other), `BREVO_API_KEY` (see "Email"
+  below for why it's Brevo and not Gmail SMTP).
 
 Everything else (the cross-service URLs, `NODE_ENV`, `APP_CONFIG`,
 etc.) is already wired up in `render.yaml`.
@@ -111,7 +127,7 @@ The main site's own `/admin/login` uses `ADMIN_EMAIL` /
 
 - Visit `shds-website`'s URL — confirm the homepage loads.
 - Submit the Contact and Donate forms — confirm they succeed and that
-  the branded confirmation emails arrive (via the `MAIL_*` config on
+  the branded confirmation emails arrive (via the `BREVO_*` config on
   `shds-backend`).
 - Visit `shds-admin`'s URL and log in with the account from step 4.
 
