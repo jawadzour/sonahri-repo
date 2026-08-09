@@ -1,4 +1,15 @@
-import "dotenv/config";
+import path from "node:path";
+import dotenv from "dotenv";
+
+// Resolved from process.cwd() (always the repo root, since both `pnpm dev`
+// and `pnpm start` run from there) rather than from this file's own
+// location — a relative-to-__dirname path would differ between running
+// the TS source (server/_core/index.ts) and the esbuild-bundled output
+// (dist/index.js), silently breaking local .env loading for one of them.
+// On Render this is a no-op either way: env vars are injected directly
+// into process.env, not read from a .env file.
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+
 import express from "express";
 import { createServer } from "http";
 import net from "net";

@@ -1,17 +1,15 @@
 import { desc, eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import { Inquiry, InsertInquiry, inquiries } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
-// For managed MySQL providers that require TLS (e.g. Aiven), add
-// ?ssl={"rejectUnauthorized":true} to the end of DATABASE_URL — mysql2
-// parses that query param automatically, no extra code needed here.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      _db = drizzle(postgres(process.env.DATABASE_URL));
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;

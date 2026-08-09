@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { MapPin, Phone, Mail, Globe } from "lucide-react";
-import { trpc } from "@/lib/trpc";
+import { submitContactMessage } from "@/lib/shds-api";
 import { toast } from "sonner";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
@@ -22,32 +22,7 @@ export default function Contact() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submitInquiry = trpc.contact.submitInquiry.useMutation({
-    onSuccess: () => {
-      toast.success("Thank you! Your inquiry has been received. We will get back to you soon.");
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
-        inquiryType: "general",
-      });
-      setIsSubmitting(false);
-    },
-    onError: (error) => {
-      const isBackendUnavailable =
-        error.message?.includes("valid JSON") ||
-        error.message?.includes("Unexpected token") ||
-        error.message?.includes("Failed to fetch");
-      toast.error(
-        isBackendUnavailable
-          ? "This is a preview version — the contact form isn't connected yet. It will work on the live site."
-          : error.message || "Failed to submit inquiry. Please try again."
-      );
-      setIsSubmitting(false);
-    },
-  });
+// (submitInquiry mutation removed — handled directly in handleSubmit now)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -62,9 +37,21 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      await submitInquiry.mutateAsync(formData);
+      const successMessage = await submitContactMessage(formData);
+      toast.success(successMessage);
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+        inquiryType: "general",
+      });
     } catch (error) {
       console.error("Form submission error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to submit inquiry. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

@@ -1,9 +1,25 @@
 import { Card } from "@/components/ui/card";
 import { BookOpen, Heart, Droplet, Briefcase, Users, AlertTriangle, Handshake } from "lucide-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useEffect, useState } from "react";
+import api from "@/services/api";
 
 export default function Programs() {
   usePageTitle("Our Programs");
+  
+  const [programsData, setProgramsData] = useState([]);
+  useEffect(() => {
+  api
+    .get("/programs/")
+    .then((response) => {
+      console.log(response.data);
+      setProgramsData(response.data.data);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}, []);
+
   const programs = [
     {
       icon: BookOpen,

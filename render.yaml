@@ -1,0 +1,106 @@
+# Render Blueprint for the full SHDS stack: the main website, the Flask
+# API backend, the standalone admin panel, and their two managed Postgres
+# databases.
+#
+# Deploy: Render Dashboard -> New -> Blueprint -> connect this repo.
+# Render will prompt for every `sync: false` value below during initial
+# creation (secrets are deliberately not stored in this file).
+
+services:
+  # --- Main website (React + Express/tRPC) ---
+  - type: web
+    name: shds-website
+    runtime: node
+    plan: starter
+    region: oregon
+    branch: main
+    buildCommand: pnpm install --prod=false && pnpm build
+    startCommand: pnpm start
+    preDeployCommand: pnpm exec drizzle-kit migrate
+    autoDeploy: true
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase: shds-db
+      - key: VITE_SHDS_API_URL
+        value: https://shds-backend.onrender.com/api/v1/public
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+
+  # --- Flask API backend ---
+  - type: web
+    name: shds-backend
+    runtime: docker
+    plan: starter
+    region: oregon
+    branch: main
+    dockerfilePath: shds-backend/Dockerfile
+    dockerContext: shds-backend
+    preDeployCommand: flask db upgrade
+    autoDeploy: true
+    healthCheckPath: /api/v1/health/
+    disk:
+      name: uploads
+      mountPath: /app/uploads
+      sizeGB: 10
+    envVars:
+      - key: APP_CONFIG
+        value: production
+      - key: FLASK_APP
+        value: wsgi.py
+      - key: DATABASE_URL
+        fromDatabase: shds-backend-db
+      - key: CORS_ORIGINS
+        value: https://shds-website.onrender.com,https://shds-admin.onrender.com
+      - key: BACKEND_BASE_URL
+        value: https://shds-backend.onrender.com
+      - key: ADMIN_FRONTEND_URL
+        value: https://shds-admin.onrender.com
+      - key: UPLOAD_FOLDER
+        value: uploads
+      - key: MAIL_ENABLED
+        value: "true"
+      - key: MAIL_SERVER
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USE_TLS
+        value: "true"
+      - key: MAIL_USERNAME
+        value: jawadzour786@gmail.com
+      - key: MAIL_DEFAULT_SENDER
+        value: jawadzour786@gmail.com
+      - key: SECRET_KEY
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+
+  # --- Standalone admin panel (static React SPA) ---
+  - type: web
+    name: shds-admin
+    runtime: static
+    branch: main
+    buildCommand: cd shds-admin && npm install && npm run build
+    staticPublishPath: shds-admin/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://shds-backend.onrender.com/api/v1
+
+databases:
+  - name: shds-db
+    plan: starter
+    region: oregon
+    diskSizeGB: 10
+
+  - name: shds-backend-db
+    plan: starter
+    region: oregon
+    diskSizeGB: 10

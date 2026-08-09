@@ -17,7 +17,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
-
+import Donate from "@/pages/Donate";
 
 function Router() {
   return (
@@ -30,6 +30,7 @@ function Router() {
       <Route path={"/impact"} component={Impact} />
       <Route path={"/governance"} component={Governance} />
       <Route path={"/gallery"} component={Gallery} />
+      <Route path={"/donate"} component={Donate} />
       <Route path={"/contact"} component={Contact} />
       <Route path={"/admin/login"} component={AdminLogin} />
       <Route path={"/admin"} component={AdminDashboard} />

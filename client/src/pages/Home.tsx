@@ -57,13 +57,24 @@ export default function Home() {
   ];
 
   const plantationPhotos = [
-    "/images/plantation/plantation-01.jpg",
-    "/images/plantation/plantation-02.jpg",
-    "/images/plantation/plantation-03.jpg",
-    "/images/plantation/plantation-04.jpg",
-    "/images/plantation/plantation-05.jpg",
-    "/images/plantation/plantation-06.jpg",
-  ];
+  // Purani images
+  "/images/plantation/plantation-01.jpg",
+  "/images/plantation/plantation-02.jpg",
+  "/images/plantation/plantation-03.jpg",
+  "/images/plantation/plantation-04.jpg",
+  "/images/plantation/plantation-05.jpg",
+  "/images/plantation/plantation-06.jpg",
+  // Nayi images
+  "/images/plantation/plantation-new-01.jpg",
+  "/images/plantation/plantation-new-02.jpg",
+  "/images/plantation/plantation-new-03.jpg",
+  "/images/plantation/plantation-new-04.jpg",
+  "/images/plantation/plantation-new-05.jpg",
+  "/images/plantation/plantation-new-06.jpg",
+  "/images/plantation/plantation-new-08.jpg",
+  "/images/plantation/plantation-new-09.jpg",
+  "/images/plantation/plantation-new-10.jpg",
+];
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
@@ -113,19 +124,18 @@ export default function Home() {
                 across 19 districts of Sindh.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/programs">
-                  <Button className="bg-[#2d8659] hover:bg-[#1b5e3f] px-8 py-6 text-lg font-semibold w-full sm:w-auto">
+                <Button asChild className="bg-[#2d8659] hover:bg-[#1b5e3f] px-8 py-6 text-lg font-semibold w-full sm:w-auto">
+                  <Link href="/programs">
                     Our Programs <ArrowRight className="ml-2 w-5 h-5" />
-                  </Button>
-                </Link>
-                <Link href="/impact">
-                  <Button
-                    variant="outline"
-                    className="border-[#2d8659] text-[#1b5e3f] bg-white/70 hover:bg-white px-8 py-6 text-lg font-semibold w-full sm:w-auto"
-                  >
-                    See Our Impact
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="border-[#2d8659] text-[#1b5e3f] bg-white/70 hover:bg-white px-8 py-6 text-lg font-semibold w-full sm:w-auto"
+                >
+                  <Link href="/impact">See Our Impact</Link>
+                </Button>
               </div>
             </motion.div>
 
@@ -265,7 +275,7 @@ export default function Home() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: idx * 0.08 }}
-                className="rounded-xl overflow-hidden shadow-lg group relative aspect-square"
+                className="rounded-xl overflow-hidden shadow-lg group relative aspect-square border-4 border-white ring-2 ring-[#2d8659]/40"
               >
                 <img
                   src={src}
@@ -344,21 +354,19 @@ export default function Home() {
               >
                 <h3 className="text-xl font-bold text-gray-900 mb-3">{program.title}</h3>
                 <p className="text-gray-700 mb-4">{program.description}</p>
-                <Link href="/programs">
-                  <Button variant="ghost" className="text-[#2d8659] hover:text-[#1b5e3f] p-0 h-auto">
+                <Button asChild variant="ghost" className="text-[#2d8659] hover:text-[#1b5e3f] p-0 h-auto">
+                  <Link href="/programs">
                     Learn More <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </Card>
             ))}
           </div>
 
           <div className="text-center mt-12">
-            <Link href="/programs">
-              <Button className="bg-[#2d8659] hover:bg-[#1b5e3f] px-8 py-6 text-lg">
-                Explore All Programs
-              </Button>
-            </Link>
+            <Button asChild className="bg-[#2d8659] hover:bg-[#1b5e3f] px-8 py-6 text-lg">
+              <Link href="/programs">Explore All Programs</Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -372,11 +380,11 @@ export default function Home() {
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             Whether you have a question, partnership opportunity, or want to support our mission, we'd love to hear from you.
           </p>
-          <Link href="/contact">
-            <Button className="bg-white text-[#2d8659] hover:bg-gray-100 px-8 py-6 text-lg font-semibold">
+          <Button asChild className="bg-white text-[#2d8659] hover:bg-gray-100 px-8 py-6 text-lg font-semibold">
+            <Link href="/contact">
               Get in Touch <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
     </div>

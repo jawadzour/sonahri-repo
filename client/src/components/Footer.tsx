@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
 import { Mail, Phone, MapPin, Heart, Globe } from "lucide-react";
 
 export default function Footer() {
@@ -13,10 +14,23 @@ export default function Footer() {
     { label: "Governance", href: "/governance" },
     { label: "Gallery", href: "/gallery" },
     { label: "Contact", href: "/contact" },
+    { label: "Donate", href: "/donate" },
   ];
 
   return (
     <footer className="bg-gray-900 text-gray-300">
+      {/* Donate Banner */}
+      <div className="bg-gradient-to-r from-[#2d8659] to-[#1e5a96]">
+        <div className="container mx-auto px-4 max-w-6xl py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div>
+            <h3 className="text-white font-bold text-xl">Support Our Mission</h3>
+            <p className="text-blue-100 text-sm mt-1">
+              Your donation helps us build resilient communities in rural Sindh.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Main Footer */}
       <div className="container mx-auto px-4 max-w-6xl py-16 md:py-24">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
@@ -37,7 +51,7 @@ export default function Footer() {
               SONAHRI (SHDS)
             </h3>
             <p className="text-gray-400 text-sm leading-relaxed">
-              Sonahri Humanitarian Development Society — Building resilient communities in rural Sindh since 2010.
+              Sonahri Humanitarian Development Society - Building resilient communities in rural Sindh since 2010.
             </p>
           </div>
 
@@ -47,10 +61,11 @@ export default function Footer() {
             <ul className="space-y-2">
               {footerLinks.slice(0, 4).map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href}>
-                    <a className="text-gray-400 hover:text-white transition-colors text-sm">
-                      {link.label}
-                    </a>
+                  <Link
+                    href={link.href}
+                    className="text-gray-400 hover:text-white transition-colors text-sm"
+                  >
+                    {link.label}
                   </Link>
                 </li>
               ))}
@@ -63,10 +78,11 @@ export default function Footer() {
             <ul className="space-y-2">
               {footerLinks.slice(4).map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href}>
-                    <a className="text-gray-400 hover:text-white transition-colors text-sm">
-                      {link.label}
-                    </a>
+                  <Link
+                    href={link.href}
+                    className="text-gray-400 hover:text-white transition-colors text-sm"
+                  >
+                    {link.label}
                   </Link>
                 </li>
               ))}
@@ -80,8 +96,8 @@ export default function Footer() {
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-[#2d8659] flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-gray-400">
-                  <p className="font-semibold text-white">House No 323, Turkish Colony</p>
-                  <p>Makli, Thatta &mdash; Head Office</p>
+                  <p className="font-semibold text-white">Office No 323, Turkish Colony</p>
+                  <p>Makli, Thatta - Head Office</p>
                 </div>
               </li>
               <li className="flex items-start gap-2">
@@ -97,13 +113,14 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-2">
                 <Globe className="w-4 h-4 text-[#2d8659] flex-shrink-0 mt-0.5" />
+                
                 <a
-                  href="https://www.shdshome.org"
+                  href="https://www.sonahri.org"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-gray-400 hover:text-white transition-colors"
                 >
-                  www.shdshome.org
+                  www.sonahri.org
                 </a>
               </li>
             </ul>
@@ -117,7 +134,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-sm text-gray-400 text-center md:text-left">
             <p>
-              © {currentYear} Sonahri Humanitarian Development Society. All rights reserved.
+              (c) {currentYear} Sonahri Humanitarian Development Society. All rights reserved.
             </p>
           </div>
 
@@ -129,5 +146,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  );
+            );
 }

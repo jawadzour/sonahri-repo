@@ -75,10 +75,15 @@ hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
 rounded-2xl shadow-md hover:border-orange-500
 hover:bg-green-50 hover:shadow-2xl
 hover:-translate-y-2 transition-all duration-300">
-            <div className="flex items-start gap-6">
-              <Briefcase className="w-12 h-12 text-[#2d8659] flex-shrink-0
-group-hover:scale-110 transition-transform duration-300" />
-              <div>
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+              <div className="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full md:rounded-2xl overflow-hidden border-4 border-white ring-2 ring-[#2d8659]/40 shadow-lg flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
+                <img
+                  src="/images/team/ceo-inayat-ali.jpg"
+                  alt="Mr. Inayat Ali, Chief Executive Officer of SHDS"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="text-center sm:text-left">
                 <h3 className="text-3xl font-bold text-gray-900 mb-2
 group-hover:text-[#2d8659] transition-colors duration-300">Chief Executive Officer</h3>
                 <p className="text-2xl font-semibold text-[#2d8659] mb-4">Mr. Inayat Ali</p>
