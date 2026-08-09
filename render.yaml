@@ -100,11 +100,11 @@ services:
 
 databases:
   - name: shds-db
-    plan: starter
+    plan: basic-256mb
     region: oregon
     diskSizeGB: 10
 
   - name: shds-backend-db
-    plan: starter
+    plan: basic-256mb
     region: oregon
     diskSizeGB: 10
