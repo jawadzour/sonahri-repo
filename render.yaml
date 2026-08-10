@@ -20,7 +20,6 @@ services:
     branch: main
     buildCommand: pnpm install --prod=false && pnpm build
     startCommand: pnpm start
-    preDeployCommand: pnpm exec drizzle-kit migrate
     autoDeploy: true
     healthCheckPath: /
     envVars:
@@ -46,7 +45,6 @@ services:
     branch: main
     dockerfilePath: shds-backend/Dockerfile
     dockerContext: shds-backend
-    preDeployCommand: flask db upgrade
     autoDeploy: true
     healthCheckPath: /api/v1/health/
     envVars:

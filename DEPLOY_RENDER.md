@@ -84,14 +84,13 @@ etc.) is already wired up in `render.yaml`.
 
 ## 3) What happens automatically on deploy — and what doesn't (free tier)
 
-`render.yaml` defines `preDeployCommand` for both `shds-website`
-(`pnpm exec drizzle-kit migrate`) and `shds-backend` (`flask db
-upgrade`) to apply migrations before each deploy. **`preDeployCommand`
-is a paid-plan-only feature** — Render silently ignores it on `plan:
-free` services, so migrations do NOT run automatically here. Likewise,
-**Shell/SSH access is also paid-only**, so you can't just open a shell
-on the live service to run one-off commands the way you normally
-would.
+**`preDeployCommand` is a paid-plan-only feature** — Render now rejects
+Blueprint creation outright if a `plan: free` service sets one
+(`pre-deploy command is not supported for free tier services`), so
+`render.yaml` doesn't set it at all. Migrations do NOT run
+automatically here. Likewise, **Shell/SSH access is also paid-only**,
+so you can't just open a shell on the live service to run one-off
+commands the way you normally would.
 
 The workaround: since both Neon databases are reachable from anywhere
 on the internet (not just from Render), run migrations **locally**,
