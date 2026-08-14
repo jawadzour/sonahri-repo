@@ -50,7 +50,7 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: CORS_ORIGINS
-        value: https://shds-website.onrender.com,https://shds-admin.onrender.com
+        value: https://shds-website.onrender.com,https://shds-admin.onrender.com,https://sonahri.org,https://www.sonahri.org,https://admin.sonahri.org
       - key: BACKEND_BASE_URL
         value: https://shds-backend.onrender.com
       - key: ADMIN_FRONTEND_URL
