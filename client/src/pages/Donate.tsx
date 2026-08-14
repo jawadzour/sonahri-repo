@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Landmark, Smartphone, Upload, CheckCircle2 } from "lucide-react";
+import { Landmark, Upload, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import {
@@ -43,16 +43,10 @@ const initialFormState: FormState = {
   currency: "PKR",
   programId: "",
   message: "",
-  paymentMethod: "",
+  paymentMethod: "bank_transfer",
   transactionReference: "",
   isAnonymous: false,
 };
-
-const PAYMENT_METHODS: { value: DonationPaymentMethod; label: string; icon: typeof Landmark }[] = [
-  { value: "bank_transfer", label: "Bank Transfer", icon: Landmark },
-  { value: "jazzcash", label: "JazzCash", icon: Smartphone },
-  { value: "easypaisa", label: "Easypaisa", icon: Smartphone },
-];
 
 export default function Donate() {
   usePageTitle("Donate");
@@ -182,8 +176,8 @@ export default function Donate() {
             <>
               <h2 className="text-4xl font-bold mb-4 text-gray-900">Make a Donation</h2>
               <p className="text-gray-600 text-lg mb-12">
-                Fill out the form below. After choosing a payment method, we'll show you the account
-                details to send your donation to.
+                Fill out the form below. We accept donations via bank transfer — the account details
+                are shown below.
               </p>
 
               <Card className="p-8 border-0 shadow-lg">
@@ -321,88 +315,53 @@ export default function Donate() {
 
                   {/* Payment Method */}
                   <div>
-                    <Label className="text-gray-900 font-semibold mb-3 block">Payment Method *</Label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      {PAYMENT_METHODS.map(({ value, label, icon: Icon }) => (
-                        <button
-                          key={value}
-                          type="button"
-                          onClick={() => setFormData((prev) => ({ ...prev, paymentMethod: value }))}
-                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-300 ${
-                            formData.paymentMethod === value
-                              ? "border-[#2d8659] bg-[#2d8659]/5 shadow-md"
-                              : "border-gray-200 hover:border-[#2d8659]/50"
-                          }`}
-                        >
-                          <Icon
-                            className={`w-6 h-6 ${
-                              formData.paymentMethod === value ? "text-[#2d8659]" : "text-gray-500"
-                            }`}
-                          />
-                          <span className="text-sm font-semibold text-gray-800">{label}</span>
-                        </button>
-                      ))}
+                    <Label className="text-gray-900 font-semibold mb-3 block">Payment Method</Label>
+                    <div className="flex items-center gap-2 p-4 rounded-xl border-2 border-[#2d8659] bg-[#2d8659]/5 shadow-md max-w-xs">
+                      <Landmark className="w-6 h-6 text-[#2d8659]" />
+                      <span className="text-sm font-semibold text-gray-800">Bank Transfer</span>
                     </div>
                     {errors.paymentMethod && (
                       <p className="text-sm text-red-600 mt-2">{errors.paymentMethod}</p>
                     )}
                   </div>
 
-                  {/* Payment details, shown once a method is picked */}
-                  {formData.paymentMethod && (
-                    <div className="border-2 border-[#2d8659]/30 bg-[#2d8659]/5 rounded-xl p-6">
-                      <p className="text-sm font-semibold text-[#2d8659] mb-3 uppercase tracking-wide">
-                        Send your donation to
+                  {/* Payment details */}
+                  <div className="border-2 border-[#2d8659]/30 bg-[#2d8659]/5 rounded-xl p-6">
+                    <p className="text-sm font-semibold text-[#2d8659] mb-3 uppercase tracking-wide">
+                      Send your donation to
+                    </p>
+
+                    <div className="space-y-1.5 text-gray-800">
+                      <p>
+                        <span className="font-semibold">Account Title:</span>{" "}
+                        {settings?.donation_account_title || "—"}
                       </p>
-
-                      {formData.paymentMethod === "bank_transfer" && (
-                        <div className="space-y-1.5 text-gray-800">
-                          <p>
-                            <span className="font-semibold">Account Title:</span>{" "}
-                            {settings?.donation_account_title || "—"}
-                          </p>
-                          <p>
-                            <span className="font-semibold">Bank Name:</span>{" "}
-                            {settings?.donation_bank_name || "—"}
-                          </p>
-                          <p>
-                            <span className="font-semibold">Account Number:</span>{" "}
-                            {settings?.donation_account_number || "—"}
-                          </p>
-                          <p>
-                            <span className="font-semibold">IBAN:</span>{" "}
-                            {settings?.donation_iban || "—"}
-                          </p>
-                          {settings?.donation_swift_code && (
-                            <p>
-                              <span className="font-semibold">SWIFT/BIC (for international transfers):</span>{" "}
-                              {settings.donation_swift_code}
-                            </p>
-                          )}
-                        </div>
-                      )}
-
-                      {formData.paymentMethod === "jazzcash" && (
-                        <p className="text-gray-800">
-                          <span className="font-semibold">JazzCash Number:</span>{" "}
-                          {settings?.donation_jazzcash_number || "—"}
-                        </p>
-                      )}
-
-                      {formData.paymentMethod === "easypaisa" && (
-                        <p className="text-gray-800">
-                          <span className="font-semibold">Easypaisa Number:</span>{" "}
-                          {settings?.donation_easypaisa_number || "—"}
-                        </p>
-                      )}
-
-                      {settings?.donation_instructions && (
-                        <p className="text-sm text-gray-600 mt-3 pt-3 border-t border-[#2d8659]/20">
-                          {settings.donation_instructions}
+                      <p>
+                        <span className="font-semibold">Bank Name:</span>{" "}
+                        {settings?.donation_bank_name || "—"}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Account Number:</span>{" "}
+                        {settings?.donation_account_number || "—"}
+                      </p>
+                      <p>
+                        <span className="font-semibold">IBAN:</span>{" "}
+                        {settings?.donation_iban || "—"}
+                      </p>
+                      {settings?.donation_swift_code && (
+                        <p>
+                          <span className="font-semibold">SWIFT/BIC (for international transfers):</span>{" "}
+                          {settings.donation_swift_code}
                         </p>
                       )}
                     </div>
-                  )}
+
+                    {settings?.donation_instructions && (
+                      <p className="text-sm text-gray-600 mt-3 pt-3 border-t border-[#2d8659]/20">
+                        {settings.donation_instructions}
+                      </p>
+                    )}
+                  </div>
 
                   {/* Transaction Reference */}
                   <div>
