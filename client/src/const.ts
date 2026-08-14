@@ -1,5 +1,3 @@
-export const ADMIN_LOGIN_PATH = "/admin/login";
-
 export type DonationPaymentMethod = "bank_transfer" | "jazzcash" | "easypaisa";
 
 export const DONATION_CURRENCIES = ["PKR", "USD", "GBP", "EUR"] as const;

@@ -11,8 +11,6 @@ import Impact from "@/pages/Impact";
 import Governance from "@/pages/Governance";
 import Gallery from "@/pages/Gallery";
 import Contact from "@/pages/Contact";
-import AdminLogin from "@/pages/AdminLogin";
-import AdminDashboard from "@/pages/AdminDashboard";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -32,8 +30,6 @@ function Router() {
       <Route path={"/gallery"} component={Gallery} />
       <Route path={"/donate"} component={Donate} />
       <Route path={"/contact"} component={Contact} />
-      <Route path={"/admin/login"} component={AdminLogin} />
-      <Route path={"/admin"} component={AdminDashboard} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -1,10 +1,13 @@
 # Render Blueprint for the full SHDS stack: the main website, the Flask
 # API backend, and the standalone admin panel.
 #
-# Databases are NOT hosted on Render (its free Postgres auto-deletes
-# after 30 days). Both DATABASE_URLs below are `sync: false` - paste in
-# connection strings from two free Neon projects during Blueprint setup.
-# See DEPLOY_RENDER.md for the exact steps.
+# There is a single database (Postgres), used only by shds-backend.
+# shds-website and shds-admin are both stateless — they talk to
+# shds-backend's API for everything. The database is NOT hosted on
+# Render (its free Postgres auto-deletes after 30 days); DATABASE_URL
+# below is `sync: false` - paste in the connection string from a free
+# Neon project during Blueprint setup. See DEPLOY_RENDER.md for the
+# exact steps.
 #
 # Deploy: Render Dashboard -> New -> Blueprint -> connect this repo.
 # Render will prompt for every `sync: false` value below during initial
@@ -25,16 +28,8 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DATABASE_URL
-        sync: false
       - key: VITE_SHDS_API_URL
         value: https://shds-backend.onrender.com/api/v1/public
-      - key: JWT_SECRET
-        sync: false
-      - key: ADMIN_EMAIL
-        sync: false
-      - key: ADMIN_PASSWORD_HASH
-        sync: false
 
   # --- Flask API backend ---
   - type: web

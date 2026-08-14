@@ -11,29 +11,31 @@ This repo deploys as **three services** on Render, defined together in
 
 **Everything on Render runs on the free tier** (`plan: free`) to keep
 Render's cost at $0/month. Postgres is **not** hosted on Render —
-Render's free Postgres auto-deletes after 30 days, so both databases
-live on [Neon](https://neon.tech) instead, which has a genuinely
+Render's free Postgres auto-deletes after 30 days, so the database
+lives on [Neon](https://neon.tech) instead, which has a genuinely
 permanent free tier (0.5 GB storage, 100 compute-hours/month, no
 credit card required).
 
-## 0) Create two free Neon projects
+There is only **one database**, used only by `shds-backend`.
+`shds-website` and `shds-admin` are both stateless — they call
+`shds-backend`'s API for everything (contact form, donations, content),
+so neither needs its own `DATABASE_URL`.
+
+## 0) Create a free Neon project
 
 Sign up at [neon.tech](https://neon.tech) (no credit card needed), then
-create two projects:
+create a project — **`shds-backend-db`**.
 
-1. **`shds-db`** — for the main site
-2. **`shds-backend-db`** — for the Flask backend
-
-For each project, open its dashboard → **Connection Details** → copy
-the **pooled connection string** (not the direct one — the pooled
-connection handles Neon's scale-to-zero behavior better for a web app).
-It looks like:
+Open its dashboard → **Connection Details** → copy the **pooled
+connection string** (not the direct one — the pooled connection
+handles Neon's scale-to-zero behavior better for a web app). It looks
+like:
 
 ```
 postgresql://<user>:<password>@<host>-pooler.<region>.aws.neon.tech/<dbname>?sslmode=require
 ```
 
-Keep both connection strings handy for step 2.
+Keep the connection string handy for step 2.
 
 ### Email: Brevo, not SMTP
 
@@ -56,7 +58,7 @@ Keep the API key and the verified sender email handy for step 2.
 - Render Dashboard → **New** → **Blueprint** → connect the
   `jawadzour/sonahri-repo` GitHub repo.
 - Render detects `render.yaml` and shows a plan to create all three
-  services (no databases — those are on Neon now).
+  services (no database — that's on Neon now).
 
 (Alternative: all three services can also be created directly via
 Render's REST API — `POST /v1/services` once per service, mirroring
@@ -70,14 +72,11 @@ Every env var marked `sync: false` in `render.yaml` gets prompted for
 during that initial Blueprint creation (values are never stored in the
 repo). Have these ready:
 
-- **`shds-website`**: `DATABASE_URL` (the `shds-db` Neon pooled
-  connection string from step 0), `JWT_SECRET` (any long random
-  string), `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` — generate the hash
-  locally with `node scripts/generate-password-hash.mjs "yourpassword"`.
 - **`shds-backend`**: `DATABASE_URL` (the `shds-backend-db` Neon pooled
-  connection string), `SECRET_KEY`, `JWT_SECRET_KEY` (any long random
-  strings, different from each other), `BREVO_API_KEY` (see "Email"
-  below for why it's Brevo and not Gmail SMTP).
+  connection string from step 0), `SECRET_KEY`, `JWT_SECRET_KEY` (any
+  long random strings, different from each other), `BREVO_API_KEY` (see
+  "Email" below for why it's Brevo and not Gmail SMTP).
+- **`shds-website`**: nothing — it has no secrets of its own.
 
 Everything else (the cross-service URLs, `NODE_ENV`, `APP_CONFIG`,
 etc.) is already wired up in `render.yaml`.
@@ -92,20 +91,18 @@ automatically here. Likewise, **Shell/SSH access is also paid-only**,
 so you can't just open a shell on the live service to run one-off
 commands the way you normally would.
 
-The workaround: since both Neon databases are reachable from anywhere
-on the internet (not just from Render), run migrations **locally**,
-pointing at the production connection strings, before or right after
-each deploy that changes the schema:
+The workaround: since Neon is reachable from anywhere on the internet
+(not just from Render), run migrations **locally**, pointing at the
+production connection string, before or right after each deploy that
+changes the schema:
 
 ```bash
-# Main site — from the repo root
-DATABASE_URL="<shds-db pooled connection string>" pnpm exec drizzle-kit migrate
-
 # Flask backend — from shds-backend/, with the venv active
 DATABASE_URL="<shds-backend-db pooled connection string>" APP_CONFIG=production FLASK_APP=wsgi.py python -m flask db upgrade
 ```
 
-`shds-admin` has no database/migration step — it's a static build.
+`shds-website` and `shds-admin` have no database/migration step —
+`shds-website` is stateless and `shds-admin` is a static build.
 
 ## 4) One manual step: create the first shds-backend admin
 
@@ -117,10 +114,8 @@ cd shds-backend
 DATABASE_URL="<shds-backend-db pooled connection string>" APP_CONFIG=production FLASK_APP=wsgi.py python -m flask create-admin --name "Admin" --email "you@example.com" --password "yourpassword"
 ```
 
-This is the login for the `shds-admin` panel.
-
-The main site's own `/admin/login` uses `ADMIN_EMAIL` /
-`ADMIN_PASSWORD_HASH` instead — no extra step needed there.
+This is the login for the `shds-admin` panel — the only admin login in
+this stack.
 
 ## 5) Verify
 
