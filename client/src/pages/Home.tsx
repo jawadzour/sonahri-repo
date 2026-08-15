@@ -12,10 +12,9 @@ import {
   TreePine,
   Leaf,
 } from "lucide-react";
-import { usePageTitle } from "@/hooks/usePageTitle";
+import Seo from "@/components/Seo";
 
 export default function Home() {
-  usePageTitle("Home");
   const impactStats = [
     {
       icon: Heart,
@@ -78,6 +77,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
+      <Seo path="/" />
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 md:py-28">
         {/* Sunrise field gradient scene */}
@@ -279,7 +279,7 @@ export default function Home() {
               >
                 <img
                   src={src}
-                  alt={`Tree plantation activity ${idx + 1}`}
+                  alt={`SHDS tree plantation and environmental awareness drive in rural Sindh, photo ${idx + 1}`}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>

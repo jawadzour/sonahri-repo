@@ -1,10 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Eye, Target, Heart, CheckCircle2 } from "lucide-react";
-import { usePageTitle } from "@/hooks/usePageTitle";
-
+import Seo from "@/components/Seo";
 
 export default function About() {
-  usePageTitle("About Us");
   const coreValues = [
     { title: "Equity", description: "We prioritize those who are furthest behind, with special attention to women, children, and disaster-affected communities." },
     { title: "Transparency", description: "Our work is governed by accountability to the communities we serve, our partners, and our donors." },
@@ -23,6 +21,7 @@ export default function About() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Seo path="/about" />
       {/* Header */}
       <section className="bg-gradient-to-r from-[#2d8659] to-[#1e5a96] text-white py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-6xl">

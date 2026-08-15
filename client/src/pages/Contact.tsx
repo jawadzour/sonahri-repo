@@ -7,10 +7,9 @@ import { Label } from "@/components/ui/label";
 import { MapPin, Phone, Mail, Globe } from "lucide-react";
 import { submitContactMessage } from "@/lib/shds-api";
 import { toast } from "sonner";
-import { usePageTitle } from "@/hooks/usePageTitle";
+import Seo from "@/components/Seo";
 
 export default function Contact() {
-  usePageTitle("Contact Us");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -57,6 +56,7 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Seo path="/contact" />
       {/* Header */}
       <section className="bg-gradient-to-r from-[#2d8659] to-[#1e5a96] text-white py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-6xl">

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { ImageIcon } from "lucide-react";
-import { usePageTitle } from "@/hooks/usePageTitle";
+import Seo from "@/components/Seo";
 
 type GalleryImage = {
   file: string;
@@ -10,7 +10,6 @@ type GalleryImage = {
 };
 
 export default function Gallery() {
-  usePageTitle("Gallery");
   const galleryCategories: { title: string; description: string; images: GalleryImage[] }[] = [
     {
       title: "Education Programs",
@@ -71,6 +70,7 @@ export default function Gallery() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Seo path="/gallery" />
       {/* Header */}
       <section className="bg-gradient-to-r from-[#2d8659] to-[#1e5a96] text-white py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-6xl">

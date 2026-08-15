@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
+import { injectSeoTags } from "./seo";
 
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
@@ -39,7 +40,7 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx?v=${nanoid()}"`
       );
       const page = await vite.transformIndexHtml(url, template);
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+      res.status(200).set({ "Content-Type": "text/html" }).end(injectSeoTags(page, url));
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
       next(e);
@@ -60,8 +61,17 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath));
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+  // Cached once at startup: the built index.html doesn't change at runtime.
+  const indexPath = path.resolve(distPath, "index.html");
+  const indexTemplate = fs.existsSync(indexPath) ? fs.readFileSync(indexPath, "utf-8") : null;
+
+  // fall through to index.html if the file doesn't exist, with per-route
+  // SEO tags injected into the static shell (see injectSeoTags).
+  app.use("*", (req, res) => {
+    if (indexTemplate === null) {
+      res.status(500).send("Build not found. Run the build step before starting the server.");
+      return;
+    }
+    res.status(200).set({ "Content-Type": "text/html" }).end(injectSeoTags(indexTemplate, req.originalUrl));
   });
 }

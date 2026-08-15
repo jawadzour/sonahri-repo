@@ -6,11 +6,53 @@
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Sonahri Humanitarian Development Society (SHDS)</title>
+
+    <!-- The tags with `id="seo-*"` below are placeholders: the Express
+         server rewrites their content per-route (see server/_core/seo.ts)
+         before sending this file, so crawlers and link-unfurlers that don't
+         run JavaScript still see the right title/description/OG tags for
+         whichever page was requested. react-helmet-async keeps them in sync
+         client-side during in-app navigation. -->
+    <title id="seo-title">Sonahri Humanitarian Development Society (SHDS)</title>
+    <meta name="description" id="seo-description" content="SHDS mobilizes communities and delivers inclusive development programs in education, health, clean water, women empowerment, and disaster relief across 19 districts of Sindh, Pakistan since 2010." />
+    <link rel="canonical" id="seo-canonical" href="https://sonahri.org/" />
+    <meta name="robots" id="seo-robots" content="index, follow" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Sonahri Humanitarian Development Society (SHDS)" />
+    <meta property="og:title" id="seo-og-title" content="Sonahri Humanitarian Development Society (SHDS)" />
+    <meta property="og:description" id="seo-og-description" content="SHDS mobilizes communities and delivers inclusive development programs in education, health, clean water, women empowerment, and disaster relief across 19 districts of Sindh, Pakistan since 2010." />
+    <meta property="og:url" id="seo-og-url" content="https://sonahri.org/" />
+    <meta property="og:image" content="https://sonahri.org/images/hero-bg.jpg" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" id="seo-twitter-title" content="Sonahri Humanitarian Development Society (SHDS)" />
+    <meta name="twitter:description" id="seo-twitter-description" content="SHDS mobilizes communities and delivers inclusive development programs in education, health, clean water, women empowerment, and disaster relief across 19 districts of Sindh, Pakistan since 2010." />
+    <meta name="twitter:image" content="https://sonahri.org/images/hero-bg.jpg" />
+
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "NGO",
+        "name": "Sonahri Humanitarian Development Society",
+        "alternateName": "SHDS",
+        "url": "https://sonahri.org",
+        "logo": "https://sonahri.org/images/logo.png",
+        "foundingDate": "2010",
+        "areaServed": { "@type": "AdministrativeArea", "name": "Sindh, Pakistan" },
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Office No 323, Turkish Colony, Makli",
+          "addressRegion": "Sindh",
+          "addressCountry": "PK"
+        }
+      }
+    </script>
   </head>
 
   <body>

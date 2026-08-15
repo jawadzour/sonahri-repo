@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Landmark, Upload, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { usePageTitle } from "@/hooks/usePageTitle";
+import Seo from "@/components/Seo";
 import {
   fetchPrograms,
   fetchWebsiteSettings,
@@ -49,7 +49,6 @@ const initialFormState: FormState = {
 };
 
 export default function Donate() {
-  usePageTitle("Donate");
 
   const [formData, setFormData] = useState<FormState>(initialFormState);
   const [screenshot, setScreenshot] = useState<File | null>(null);
@@ -145,6 +144,7 @@ export default function Donate() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Seo path="/donate" />
       {/* Header */}
       <section className="bg-gradient-to-r from-[#2d8659] to-[#1e5a96] text-white py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-6xl">

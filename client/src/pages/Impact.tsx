@@ -1,9 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Heart, Users, MapPin, Home, GraduationCap, Droplet, Zap } from "lucide-react";
-import { usePageTitle } from "@/hooks/usePageTitle";
+import Seo from "@/components/Seo";
 
 export default function Impact() {
-  usePageTitle("Impact");
   const metrics = [
     { icon: MapPin, label: "Districts of Operation", value: "19", color: "from-green-500 to-emerald-600" },
     { icon: Users, label: "Community Organizations Formed", value: "225", color: "from-blue-500 to-cyan-600" },
@@ -80,6 +79,7 @@ export default function Impact() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Seo path="/impact" />
       {/* Header */}
       <section className="bg-gradient-to-r from-[#2d8659] to-[#1e5a96] text-white py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-6xl">

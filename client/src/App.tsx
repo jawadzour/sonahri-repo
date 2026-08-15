@@ -1,3 +1,4 @@
+import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Navigation from "@/components/Navigation";
@@ -40,20 +41,22 @@ function Router() {
 function App() {
   useScrollToTop();
   return (
-    <ErrorBoundary>
-      <ThemeProvider defaultTheme="light">
-        <TooltipProvider>
-          <Toaster />
-          <div className="flex flex-col min-h-screen">
-            <Navigation />
-            <main className="flex-1">
-              <Router />
-            </main>
-            <Footer />
-          </div>
-        </TooltipProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+    <HelmetProvider>
+      <ErrorBoundary>
+        <ThemeProvider defaultTheme="light">
+          <TooltipProvider>
+            <Toaster />
+            <div className="flex flex-col min-h-screen">
+              <Navigation />
+              <main className="flex-1">
+                <Router />
+              </main>
+              <Footer />
+            </div>
+          </TooltipProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </HelmetProvider>
   );
 }
 

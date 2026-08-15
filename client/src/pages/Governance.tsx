@@ -1,11 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Users, Award, Building2, Briefcase } from "lucide-react";
-import { usePageTitle } from "@/hooks/usePageTitle";
+import Seo from "@/components/Seo";
 
 export default function Governance() {
-  usePageTitle("Governance & Leadership");
   return (
     <div className="min-h-screen bg-white">
+      <Seo path="/governance" />
       {/* Header */}
       <section className="bg-gradient-to-r from-[#2d8659] to-[#1e5a96] text-white py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-6xl">

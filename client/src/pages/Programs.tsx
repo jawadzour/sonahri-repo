@@ -1,12 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { BookOpen, Heart, Droplet, Briefcase, Users, AlertTriangle, Handshake } from "lucide-react";
-import { usePageTitle } from "@/hooks/usePageTitle";
+import Seo from "@/components/Seo";
 import { useEffect, useState } from "react";
 import api from "@/services/api";
 
 export default function Programs() {
-  usePageTitle("Our Programs");
-  
+
   const [programsData, setProgramsData] = useState([]);
   useEffect(() => {
   api
@@ -155,6 +154,7 @@ export default function Programs() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Seo path="/programs" />
       {/* Header */}
       <section className="bg-gradient-to-r from-[#2d8659] to-[#1e5a96] text-white py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-6xl">
