@@ -18,9 +18,10 @@ from app.models.content_block import ContentBlock  # noqa: F401
 from app.models.media_file import MediaFile  # noqa: F401
 from app.models.website_settings import WebsiteSettings  # noqa: F401
 from app.models.seo_settings import SeoSettings  # noqa: F401
+from app.models.page_view import PageView  # noqa: F401
 
 __all__ = [
     "BaseModel", "Admin", "Program", "Project", "Gallery", "Donation",
     "ContactMessage", "Partner", "Report", "TeamMember", "Volunteer",
-    "ContentBlock", "MediaFile", "WebsiteSettings", "SeoSettings",
+    "ContentBlock", "MediaFile", "WebsiteSettings", "SeoSettings", "PageView",
 ]

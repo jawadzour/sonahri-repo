@@ -16,6 +16,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
+import { useTrackPageView } from "@/hooks/useTrackPageView";
 import Donate from "@/pages/Donate";
 
 function Router() {
@@ -40,6 +41,7 @@ function Router() {
 
 function App() {
   useScrollToTop();
+  useTrackPageView();
   return (
     <HelmetProvider>
       <ErrorBoundary>

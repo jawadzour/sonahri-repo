@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -9,6 +11,9 @@ import {
   YAxis,
 } from "recharts";
 import {
+  Activity,
+  Eye,
+  Fingerprint,
   FolderKanban,
   HandHeart,
   Image as ImageIcon,
@@ -21,9 +26,10 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/crud/page-header";
 import { api } from "@/lib/api";
-import { formatCurrency, formatDateTime } from "@/lib/format";
+import { fetchVisitorSummary } from "@/lib/analytics-service";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
 import { useAuthStore } from "@/store/auth-store";
-import type { ContactMessage } from "@/types/models";
+import type { ContactMessage, VisitorSummary } from "@/types/models";
 import type { ApiPaginated } from "@/types/api";
 
 interface StatCardDef {
@@ -58,6 +64,7 @@ export default function DashboardPage() {
   const [counts, setCounts] = useState<Record<string, number | null>>({});
   const [recentMessages, setRecentMessages] = useState<ContactMessage[] | null>(null);
   const [donationTrend, setDonationTrend] = useState<{ label: string; amount: number }[] | null>(null);
+  const [visitorSummary, setVisitorSummary] = useState<VisitorSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -89,6 +96,12 @@ export default function DashboardPage() {
         setDonationTrend(Array.from(byMonth, ([label, amount]) => ({ label, amount })));
       } catch {
         setDonationTrend(null);
+      }
+
+      try {
+        setVisitorSummary(await fetchVisitorSummary());
+      } catch {
+        setVisitorSummary(null);
       }
 
       setIsLoading(false);
@@ -126,6 +139,144 @@ export default function DashboardPage() {
             </Card>
           );
         })}
+      </div>
+
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Card>
+          <CardContent className="flex items-center gap-3 pt-5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Eye className="h-4 w-4" />
+            </div>
+            <div>
+              {isLoading ? (
+                <Skeleton className="h-6 w-10" />
+              ) : visitorSummary === null ? (
+                <Badge variant="secondary" className="text-[10px]">Not connected</Badge>
+              ) : (
+                <p className="text-xl font-semibold leading-none">
+                  {visitorSummary.total_views.toLocaleString()}
+                </p>
+              )}
+              <p className="mt-1 text-xs text-muted-foreground">Total Page Views</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="flex items-center gap-3 pt-5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Fingerprint className="h-4 w-4" />
+            </div>
+            <div>
+              {isLoading ? (
+                <Skeleton className="h-6 w-10" />
+              ) : visitorSummary === null ? (
+                <Badge variant="secondary" className="text-[10px]">Not connected</Badge>
+              ) : (
+                <p className="text-xl font-semibold leading-none">
+                  {visitorSummary.unique_visitors_30d.toLocaleString()}
+                </p>
+              )}
+              <p className="mt-1 text-xs text-muted-foreground">Unique Visitors (30d)</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="flex items-center gap-3 pt-5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Activity className="h-4 w-4" />
+            </div>
+            <div>
+              {isLoading ? (
+                <Skeleton className="h-6 w-10" />
+              ) : visitorSummary === null ? (
+                <Badge variant="secondary" className="text-[10px]">Not connected</Badge>
+              ) : (
+                <p className="text-xl font-semibold leading-none">
+                  {visitorSummary.views_today.toLocaleString()}
+                </p>
+              )}
+              <p className="mt-1 text-xs text-muted-foreground">Views Today</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mb-6 grid gap-4 lg:grid-cols-5">
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle>Visitor trend (last 30 days)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <Skeleton className="h-64 w-full" />
+            ) : !visitorSummary || visitorSummary.trend.every((p) => p.views === 0) ? (
+              <p className="py-16 text-center text-sm text-muted-foreground">
+                No visitor data available yet.
+              </p>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <AreaChart data={visitorSummary.trend}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={12}
+                    minTickGap={24}
+                    tickFormatter={(value) => formatDate(value, "d MMM")}
+                  />
+                  <YAxis tickLine={false} axisLine={false} fontSize={12} width={32} allowDecimals={false} />
+                  <Tooltip
+                    labelFormatter={(value) => formatDate(String(value), "d MMM yyyy")}
+                    contentStyle={{
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="views"
+                    stroke="var(--primary)"
+                    fill="var(--primary)"
+                    fillOpacity={0.15}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Top pages (last 30 days)</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)
+            ) : !visitorSummary || visitorSummary.top_pages.length === 0 ? (
+              <div className="flex items-center gap-2 rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
+                <Eye className="h-4 w-4" />
+                No page views yet.
+              </div>
+            ) : (
+              visitorSummary.top_pages.map((page) => (
+                <div
+                  key={page.path}
+                  className="flex items-center justify-between gap-2 border-b border-border pb-3 last:border-0 last:pb-0"
+                >
+                  <span className="truncate text-sm font-medium">{page.path}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {page.views.toLocaleString()} views
+                  </span>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-5">

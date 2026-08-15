@@ -4,6 +4,7 @@ API v1 blueprint.
 
 from flask import Blueprint
 
+from app.api.v1.analytics.routes import analytics_bp
 from app.api.v1.auth.routes import auth_bp
 from app.api.v1.health.routes import health_bp
 from app.api.v1.inquiries.routes import inquiries_bp
@@ -25,6 +26,7 @@ from app.api.v1.notifications.routes import notifications_bp
 v1_bp = Blueprint("api_v1", __name__)
 
 v1_bp.register_blueprint(health_bp, url_prefix="/health")
+v1_bp.register_blueprint(analytics_bp, url_prefix="/analytics")
 v1_bp.register_blueprint(auth_bp, url_prefix="/auth")
 v1_bp.register_blueprint(inquiries_bp, url_prefix="/inquiries")
 v1_bp.register_blueprint(programs_bp, url_prefix="/programs")

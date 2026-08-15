@@ -5,12 +5,14 @@ signup, donation).
 """
 
 from flask import Blueprint, request
+from flask_limiter.util import get_remote_address
 
 from app.extensions import db, limiter
 from app.models.content_block import ContentBlock
 from app.models.donation import Donation
 from app.models.enums import InquiryType
 from app.models.gallery import Gallery
+from app.models.page_view import PageView
 from app.models.partner import Partner
 from app.models.program import Program
 from app.models.project import Project
@@ -20,6 +22,7 @@ from app.models.volunteer import Volunteer
 from app.models.seo_settings import SeoSettings
 from app.models.team_member import TeamMember
 from app.models.website_settings import WebsiteSettings
+from app.utils.analytics import hash_visitor, is_bot_user_agent
 from app.utils.errors import ValidationError
 from app.utils.parsing import parse_decimal, parse_enum, require_fields
 from app.utils.responses import success
@@ -102,6 +105,33 @@ def get_public_website_settings():
 @public_bp.get("/settings/seo")
 def get_public_seo_settings():
     return success(data=SeoSettings.get_solo().to_dict())
+
+
+@public_bp.post("/track")
+@limiter.limit("60 per minute")
+def track_page_view():
+    """
+    Records one page view for the admin dashboard's visitor stats. Fired
+    as a fire-and-forget beacon from the public site on every route change,
+    so this intentionally skips the usual success() envelope and returns a
+    bare 204 — there's nothing for the caller to read, and bot/filtered
+    hits are silently no-ops rather than errors.
+    """
+    data = request.get_json(silent=True) or {}
+    path = (data.get("path") or "/")[:255]
+    user_agent = request.headers.get("User-Agent", "")
+
+    if not is_bot_user_agent(user_agent):
+        db.session.add(
+            PageView(
+                path=path,
+                visitor_hash=hash_visitor(get_remote_address(), user_agent),
+                referrer=(data.get("referrer") or None),
+            )
+        )
+        db.session.commit()
+
+    return "", 204
 
 
 @public_bp.post("/contact")

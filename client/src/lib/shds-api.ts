@@ -24,6 +24,27 @@ async function parseResponse<T>(response: Response): Promise<ApiSuccess<T>> {
   return body;
 }
 
+// --- Page view tracking (self-hosted analytics beacon) ---
+
+export function sendPageView(path: string): void {
+  const payload = JSON.stringify({ path, referrer: document.referrer || undefined });
+  const url = `${API_BASE_URL}/track`;
+
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon(url, new Blob([payload], { type: "application/json" }));
+    return;
+  }
+
+  // Fallback for browsers without sendBeacon: keepalive lets the request
+  // survive the page navigating away before it completes.
+  fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: payload,
+    keepalive: true,
+  }).catch(() => {});
+}
+
 // --- Contact form ---
 
 export interface ContactPayload {

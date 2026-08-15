@@ -177,6 +177,25 @@ export interface WebsiteSettings {
   donation_instructions: string | null;
 }
 
+// --- Analytics (self-hosted page-view stats) ---
+export interface VisitorTrendPoint {
+  date: string;
+  views: number;
+}
+
+export interface TopPage {
+  path: string;
+  views: number;
+}
+
+export interface VisitorSummary {
+  total_views: number;
+  unique_visitors_30d: number;
+  views_today: number;
+  trend: VisitorTrendPoint[];
+  top_pages: TopPage[];
+}
+
 export interface SeoSettings {
   default_meta_title: string;
   default_meta_description: string | null;
