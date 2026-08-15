@@ -1,4 +1,5 @@
 import { HelmetProvider } from "react-helmet-async";
+import Analytics from "@/components/Analytics";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Navigation from "@/components/Navigation";
@@ -44,6 +45,7 @@ function App() {
   useTrackPageView();
   return (
     <HelmetProvider>
+      <Analytics />
       <ErrorBoundary>
         <ThemeProvider defaultTheme="light">
           <TooltipProvider>

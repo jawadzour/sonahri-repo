@@ -15,6 +15,7 @@ class SeoSettings(BaseModel):
     default_meta_description = db.Column(db.String(500), nullable=True)
     default_og_image_url = db.Column(db.String(500), nullable=True)
     google_analytics_id = db.Column(db.String(100), nullable=True)
+    google_tag_manager_id = db.Column(db.String(100), nullable=True)
     google_site_verification = db.Column(db.String(255), nullable=True)
     robots_txt = db.Column(db.Text, nullable=True)
     sitemap_enabled = db.Column(db.Boolean, default=True, nullable=False)
@@ -34,6 +35,7 @@ class SeoSettings(BaseModel):
             "default_meta_description": self.default_meta_description,
             "default_og_image_url": self.default_og_image_url,
             "google_analytics_id": self.google_analytics_id,
+            "google_tag_manager_id": self.google_tag_manager_id,
             "google_site_verification": self.google_site_verification,
             "robots_txt": self.robots_txt,
             "sitemap_enabled": self.sitemap_enabled,

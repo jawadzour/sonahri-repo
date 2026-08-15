@@ -201,6 +201,7 @@ export interface SeoSettings {
   default_meta_description: string | null;
   default_og_image_url: string | null;
   google_analytics_id: string | null;
+  google_tag_manager_id: string | null;
   google_site_verification: string | null;
   robots_txt: string | null;
   sitemap_enabled: boolean;

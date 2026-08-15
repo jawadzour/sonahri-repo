@@ -23,7 +23,8 @@ WEBSITE_FIELDS = [
 
 SEO_FIELDS = [
     "default_meta_title", "default_meta_description", "default_og_image_url",
-    "google_analytics_id", "google_site_verification", "robots_txt", "sitemap_enabled",
+    "google_analytics_id", "google_tag_manager_id", "google_site_verification",
+    "robots_txt", "sitemap_enabled",
 ]
 
 

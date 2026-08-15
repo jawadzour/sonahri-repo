@@ -111,6 +111,19 @@ export async function fetchWebsiteSettings(): Promise<PublicWebsiteSettings> {
   return body.data as PublicWebsiteSettings;
 }
 
+// --- SEO / analytics settings ---
+
+export interface PublicSeoSettings {
+  google_analytics_id: string | null;
+  google_tag_manager_id: string | null;
+}
+
+export async function fetchSeoSettings(): Promise<PublicSeoSettings> {
+  const response = await fetch(`${API_BASE_URL}/settings/seo`);
+  const body = await parseResponse<PublicSeoSettings>(response);
+  return body.data as PublicSeoSettings;
+}
+
 // --- Donations ---
 
 export type DonationPaymentMethod = "bank_transfer" | "jazzcash" | "easypaisa";

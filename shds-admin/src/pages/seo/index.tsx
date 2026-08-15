@@ -22,6 +22,7 @@ const schema = z.object({
   default_meta_description: z.string().optional().or(z.literal("")),
   default_og_image_url: z.string().optional().or(z.literal("")),
   google_analytics_id: z.string().optional().or(z.literal("")),
+  google_tag_manager_id: z.string().optional().or(z.literal("")),
   google_site_verification: z.string().optional().or(z.literal("")),
   robots_txt: z.string().optional().or(z.literal("")),
   sitemap_enabled: z.boolean(),
@@ -34,6 +35,7 @@ const defaultValues: FormValues = {
   default_meta_description: "",
   default_og_image_url: "",
   google_analytics_id: "",
+  google_tag_manager_id: "",
   google_site_verification: "",
   robots_txt: "",
   sitemap_enabled: true,
@@ -138,6 +140,16 @@ export default function SeoSettingsPage() {
             <div className="space-y-1.5">
               <Label htmlFor="google_analytics_id">Google Analytics ID</Label>
               <Input id="google_analytics_id" placeholder="G-XXXXXXXXXX" {...register("google_analytics_id")} />
+              <p className="text-xs text-muted-foreground">
+                GA4 Measurement ID, from Admin &gt; Data Streams &gt; your web stream in Google Analytics.
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="google_tag_manager_id">Google Tag Manager ID</Label>
+              <Input id="google_tag_manager_id" placeholder="GTM-XXXXXXX" {...register("google_tag_manager_id")} />
+              <p className="text-xs text-muted-foreground">
+                Container ID from the top-right of your Tag Manager workspace.
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="google_site_verification">Google site verification</Label>
