@@ -3,7 +3,7 @@
  * Uses native fetch — no new dependency needed.
  */
 
-const API_BASE_URL = import.meta.env.VITE_SHDS_API_URL || "http://localhost:5000/api/v1/public";
+const API_BASE_URL = import.meta.env.VITE_SHDS_API_URL || "https://shds-backend.onrender.com/api/v1/public";
 
 interface ApiSuccess<T> {
   success: true;
