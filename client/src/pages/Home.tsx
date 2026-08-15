@@ -356,7 +356,8 @@ export default function Home() {
                 <p className="text-gray-700 mb-4">{program.description}</p>
                 <Button asChild variant="ghost" className="text-[#2d8659] hover:text-[#1b5e3f] p-0 h-auto">
                   <Link href="/programs">
-                    Learn More <ArrowRight className="ml-2 w-4 h-4" />
+                    Learn More <span className="sr-only">about {program.title}</span>{" "}
+                    <ArrowRight className="ml-2 w-4 h-4" />
                   </Link>
                 </Button>
               </Card>
