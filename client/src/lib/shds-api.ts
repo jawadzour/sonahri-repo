@@ -141,7 +141,6 @@ export interface PublicTeamMember {
   department: string | null;
   bio: string | null;
   photo_url: string | null;
-  email: string | null;
   linkedin_url: string | null;
   display_order: number;
 }

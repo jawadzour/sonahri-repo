@@ -35,5 +35,12 @@ class TeamMember(BaseModel):
             "is_active": self.is_active,
         }
 
+    def to_public_dict(self) -> dict:
+        """Public-safe serialization for the unauthenticated /public/team-members
+        endpoint — omits email, which to_dict() includes for the admin CRUD panel."""
+        data = self.to_dict()
+        data.pop("email", None)
+        return data
+
     def __repr__(self) -> str:  # pragma: no cover
         return f"<TeamMember id={self.id} name={self.name!r}>"

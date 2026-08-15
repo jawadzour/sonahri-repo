@@ -34,12 +34,14 @@ public_bp = Blueprint("public", __name__)
 
 
 @public_bp.get("/programs")
+@limiter.limit("100 per minute")
 def list_public_programs():
     items = Program.query.filter_by(is_active=True).order_by(Program.display_order.asc()).all()
     return success(data=[p.to_dict() for p in items])
 
 
 @public_bp.get("/projects")
+@limiter.limit("100 per minute")
 def list_public_projects():
     query = Project.query
     status = request.args.get("status")
@@ -50,6 +52,7 @@ def list_public_projects():
 
 
 @public_bp.get("/gallery")
+@limiter.limit("100 per minute")
 def list_public_gallery():
     query = Gallery.query.filter_by(is_published=True)
     category = request.args.get("category")
@@ -60,24 +63,30 @@ def list_public_gallery():
 
 
 @public_bp.get("/partners")
+@limiter.limit("100 per minute")
 def list_public_partners():
     items = Partner.query.filter_by(is_active=True).order_by(Partner.display_order.asc()).all()
     return success(data=[p.to_dict() for p in items])
 
 
 @public_bp.get("/reports")
+@limiter.limit("100 per minute")
 def list_public_reports():
     items = Report.query.filter_by(is_public=True).order_by(Report.year.desc()).all()
     return success(data=[r.to_dict() for r in items])
 
 
 @public_bp.get("/team-members")
+@limiter.limit("100 per minute")
 def list_public_team_members():
     items = TeamMember.query.filter_by(is_active=True).order_by(TeamMember.display_order.asc()).all()
-    return success(data=[t.to_dict() for t in items])
+    # to_public_dict() (not to_dict()) — omits email, which is only meant
+    # for admin eyes in the CRUD panel, not this unauthenticated endpoint.
+    return success(data=[t.to_public_dict() for t in items])
 
 
 @public_bp.get("/cms/homepage")
+@limiter.limit("100 per minute")
 def get_homepage_content():
     items = (
         ContentBlock.query.filter_by(page="homepage", is_published=True)
@@ -88,6 +97,7 @@ def get_homepage_content():
 
 
 @public_bp.get("/cms/about")
+@limiter.limit("100 per minute")
 def get_about_content():
     items = (
         ContentBlock.query.filter_by(page="about", is_published=True)
@@ -98,11 +108,13 @@ def get_about_content():
 
 
 @public_bp.get("/settings/website")
+@limiter.limit("100 per minute")
 def get_public_website_settings():
     return success(data=WebsiteSettings.get_solo().to_dict())
 
 
 @public_bp.get("/settings/seo")
+@limiter.limit("100 per minute")
 def get_public_seo_settings():
     return success(data=SeoSettings.get_solo().to_dict())
 
