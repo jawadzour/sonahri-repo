@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
 import { ImageUpload } from "@/components/crud/image-upload";
 import { FileUpload } from "@/components/crud/file-upload";
 import { buildZodSchema } from "@/lib/build-schema";
@@ -72,6 +73,23 @@ export function ResourceFormDialog<T extends Record<string, unknown>>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, defaultValues]);
 
+  const [comboboxOptions, setComboboxOptions] = useState<Record<string, string[]>>({});
+  const [comboboxLoading, setComboboxLoading] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (!open) return;
+    for (const field of fields) {
+      if (field.type !== "combobox" || !field.loadOptions) continue;
+      setComboboxLoading((prev) => ({ ...prev, [field.name]: true }));
+      field
+        .loadOptions()
+        .then((options) => setComboboxOptions((prev) => ({ ...prev, [field.name]: options })))
+        .catch(() => setComboboxOptions((prev) => ({ ...prev, [field.name]: [] })))
+        .finally(() => setComboboxLoading((prev) => ({ ...prev, [field.name]: false })));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   const submit = handleSubmit(async (values) => {
     const ok = await onSubmit(values);
     if (ok) onOpenChange(false);
@@ -121,6 +139,20 @@ export function ResourceFormDialog<T extends Record<string, unknown>>({
                           ))}
                         </SelectContent>
                       </Select>
+                    )}
+                  />
+                ) : field.type === "combobox" ? (
+                  <Controller
+                    control={control}
+                    name={field.name}
+                    render={({ field: ctrl }) => (
+                      <Combobox
+                        value={ctrl.value as string}
+                        onChange={ctrl.onChange}
+                        options={comboboxOptions[field.name] ?? []}
+                        isLoading={comboboxLoading[field.name]}
+                        placeholder={field.placeholder}
+                      />
                     )}
                   />
                 ) : field.type === "boolean" ? (

@@ -1,6 +1,27 @@
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import type { GalleryImage } from "@/types/models";
 import type { ResourceConfig } from "@/types/resource-config";
+
+function GalleryPreviewCell({ row }: { row: GalleryImage }) {
+  const [open, setOpen] = useState(false);
+  if (!row.image_url) return <div className="h-12 w-16 rounded bg-muted" />;
+  return (
+    <>
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => setOpen(true)}
+        onKeyDown={(e) => e.key === "Enter" && setOpen(true)}
+        className="h-12 w-16 cursor-zoom-in overflow-hidden rounded bg-muted"
+      >
+        <img src={row.image_url} alt={row.alt_text ?? ""} className="h-full w-full object-cover" />
+      </div>
+      <ImageLightbox src={row.image_url} alt={row.alt_text ?? row.category} open={open} onOpenChange={setOpen} />
+    </>
+  );
+}
 
 export const galleryConfig: ResourceConfig<GalleryImage> = {
   key: "gallery",
@@ -13,13 +34,7 @@ export const galleryConfig: ResourceConfig<GalleryImage> = {
     {
       key: "image_url",
       label: "Preview",
-      render: (row) => (
-        <div className="h-12 w-16 overflow-hidden rounded bg-muted">
-          {row.image_url && (
-            <img src={row.image_url} alt={row.alt_text ?? ""} className="h-full w-full object-cover" />
-          )}
-        </div>
-      ),
+      render: (row) => <GalleryPreviewCell row={row} />,
     },
     { key: "category", label: "Category" },
     { key: "caption", label: "Caption" },

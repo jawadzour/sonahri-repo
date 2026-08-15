@@ -1,9 +1,30 @@
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { ImageIcon } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { Donation } from "@/types/models";
 import type { ResourceConfig } from "@/types/resource-config";
+
+function ScreenshotCell({ row }: { row: Donation }) {
+  const [open, setOpen] = useState(false);
+  if (!row.payment_screenshot_url) return <>—</>;
+  return (
+    <>
+      <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
+        <ImageIcon className="h-4 w-4" />
+        View
+      </Button>
+      <ImageLightbox
+        src={row.payment_screenshot_url}
+        alt={`Payment screenshot — ${row.is_anonymous ? "Anonymous" : row.donor_name}`}
+        open={open}
+        onOpenChange={setOpen}
+      />
+    </>
+  );
+}
 
 const statusVariant: Record<Donation["status"], "secondary" | "success" | "destructive" | "warning"> = {
   pending: "warning",
@@ -42,17 +63,7 @@ export const donationsConfig: ResourceConfig<Donation> = {
     {
       key: "payment_screenshot_url",
       label: "Screenshot",
-      render: (row) =>
-        row.payment_screenshot_url ? (
-          <Button variant="ghost" size="sm" asChild>
-            <a href={row.payment_screenshot_url} target="_blank" rel="noreferrer">
-              <ImageIcon className="h-4 w-4" />
-              View
-            </a>
-          </Button>
-        ) : (
-          "—"
-        ),
+      render: (row) => <ScreenshotCell row={row} />,
     },
     {
       key: "status",

@@ -9,6 +9,7 @@ export type FieldType =
   | "email"
   | "password"
   | "select"
+  | "combobox"
   | "boolean"
   | "date"
   | "image"
@@ -32,6 +33,8 @@ export interface FieldConfig {
   colSpan?: 1 | 2;
   /** Zod schema override for this field; otherwise inferred from type/required. */
   schema?: ZodType;
+  /** For type "combobox": loads the distinct existing values to pick from. */
+  loadOptions?: () => Promise<string[]>;
 }
 
 export interface ColumnConfig<T> {

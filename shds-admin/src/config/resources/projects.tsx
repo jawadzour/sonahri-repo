@@ -1,6 +1,17 @@
 import { Badge } from "@/components/ui/badge";
+import { api } from "@/lib/api";
+import type { ApiPaginated } from "@/types/api";
 import type { Project } from "@/types/models";
 import type { ResourceConfig } from "@/types/resource-config";
+
+async function loadDistinctSectors(): Promise<string[]> {
+  const { data } = await api.get<ApiPaginated<Project>>("/projects/", { params: { page: 1, per_page: 100 } });
+  const sectors = new Set<string>();
+  for (const project of data.data) {
+    if (project.sector) sectors.add(project.sector);
+  }
+  return [...sectors].sort((a, b) => a.localeCompare(b));
+}
 
 const statusVariant: Record<Project["status"], "secondary" | "success" | "warning"> = {
   planned: "secondary",
@@ -30,7 +41,13 @@ export const projectsConfig: ResourceConfig<Project> = {
     { name: "slug", label: "Slug", type: "text", required: true },
     { name: "donor", label: "Donor", type: "text" },
     { name: "location", label: "Location", type: "text" },
-    { name: "sector", label: "Sector", type: "text" },
+    {
+      name: "sector",
+      label: "Sector / Category",
+      type: "combobox",
+      placeholder: "Select or add a category...",
+      loadOptions: loadDistinctSectors,
+    },
     {
       name: "status",
       label: "Status",
