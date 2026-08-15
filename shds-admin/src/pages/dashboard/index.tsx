@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -18,19 +18,24 @@ import {
   HandHeart,
   Image as ImageIcon,
   MessageSquare,
+  RefreshCw,
   Users as UsersIcon,
   Wallet,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/crud/page-header";
 import { api } from "@/lib/api";
 import { fetchVisitorSummary } from "@/lib/analytics-service";
+import { cn } from "@/lib/utils";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
 import { useAuthStore } from "@/store/auth-store";
 import type { ContactMessage, VisitorSummary } from "@/types/models";
 import type { ApiPaginated } from "@/types/api";
+
+const REFRESH_INTERVAL_MS = 30_000;
 
 interface StatCardDef {
   key: string;
@@ -66,53 +71,109 @@ export default function DashboardPage() {
   const [donationTrend, setDonationTrend] = useState<{ label: string; amount: number }[] | null>(null);
   const [visitorSummary, setVisitorSummary] = useState<VisitorSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const isFetchingRef = useRef(false);
+
+  const loadDashboard = useCallback(async (isBackground: boolean) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    if (isBackground) setIsRefreshing(true);
+
+    const results = await Promise.all(STAT_CARDS.map((c) => safeCount(c.endpoint)));
+    const map: Record<string, number | null> = {};
+    STAT_CARDS.forEach((c, i) => (map[c.key] = results[i]));
+    setCounts(map);
+
+    try {
+      const { data } = await api.get<ApiPaginated<ContactMessage>>("/inquiries/", {
+        params: { page: 1, per_page: 5, sort_by: "created_at", sort_dir: "desc" },
+      });
+      setRecentMessages(data.data);
+    } catch {
+      setRecentMessages(null);
+    }
+
+    try {
+      const { data } = await api.get<ApiPaginated<{ amount: number; created_at: string }>>(
+        "/donations/",
+        { params: { page: 1, per_page: 50 } }
+      );
+      const byMonth = new Map<string, number>();
+      for (const d of data.data) {
+        const month = new Date(d.created_at).toLocaleDateString("en-US", { month: "short" });
+        byMonth.set(month, (byMonth.get(month) ?? 0) + Number(d.amount));
+      }
+      setDonationTrend(Array.from(byMonth, ([label, amount]) => ({ label, amount })));
+    } catch {
+      setDonationTrend(null);
+    }
+
+    try {
+      setVisitorSummary(await fetchVisitorSummary());
+    } catch {
+      setVisitorSummary(null);
+    }
+
+    setLastUpdated(new Date());
+    setIsLoading(false);
+    setIsRefreshing(false);
+    isFetchingRef.current = false;
+  }, []);
 
   useEffect(() => {
-    (async () => {
-      const results = await Promise.all(STAT_CARDS.map((c) => safeCount(c.endpoint)));
-      const map: Record<string, number | null> = {};
-      STAT_CARDS.forEach((c, i) => (map[c.key] = results[i]));
-      setCounts(map);
+    loadDashboard(false);
 
-      try {
-        const { data } = await api.get<ApiPaginated<ContactMessage>>("/inquiries/", {
-          params: { page: 1, per_page: 5, sort_by: "created_at", sort_dir: "desc" },
-        });
-        setRecentMessages(data.data);
-      } catch {
-        setRecentMessages(null);
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        loadDashboard(true);
       }
+    }, REFRESH_INTERVAL_MS);
 
-      try {
-        const { data } = await api.get<ApiPaginated<{ amount: number; created_at: string }>>(
-          "/donations/",
-          { params: { page: 1, per_page: 50 } }
-        );
-        const byMonth = new Map<string, number>();
-        for (const d of data.data) {
-          const month = new Date(d.created_at).toLocaleDateString("en-US", { month: "short" });
-          byMonth.set(month, (byMonth.get(month) ?? 0) + Number(d.amount));
-        }
-        setDonationTrend(Array.from(byMonth, ([label, amount]) => ({ label, amount })));
-      } catch {
-        setDonationTrend(null);
+    // Catch up immediately when the admin tabs back in, rather than
+    // waiting for the next interval tick on possibly stale data.
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        loadDashboard(true);
       }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
 
-      try {
-        setVisitorSummary(await fetchVisitorSummary());
-      } catch {
-        setVisitorSummary(null);
-      }
-
-      setIsLoading(false);
-    })();
-  }, []);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [loadDashboard]);
 
   return (
     <div>
       <PageHeader
         title={`Welcome back${user ? `, ${user.name.split(" ")[0]}` : ""}`}
         description="Here's what's happening across the SHDS website today."
+        action={
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span
+                className={cn(
+                  "h-1.5 w-1.5 rounded-full",
+                  isRefreshing ? "animate-pulse bg-primary" : "bg-emerald-500"
+                )}
+              />
+              {lastUpdated
+                ? `Updated ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`
+                : "Loading…"}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => loadDashboard(true)}
+              disabled={isLoading || isRefreshing}
+            >
+              <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
+              Refresh
+            </Button>
+          </div>
+        }
       />
 
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
