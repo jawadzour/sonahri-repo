@@ -74,17 +74,99 @@ export async function submitContactMessage(payload: ContactPayload): Promise<str
   return body.message || "Thank you! Your inquiry has been received.";
 }
 
-// --- Programs (for the Donate page's optional program dropdown) ---
+// --- Programs ---
 
 export interface PublicProgram {
   id: number;
   title: string;
   slug: string;
+  icon: string | null;
+  summary: string | null;
+  description: string | null;
 }
 
 export async function fetchPrograms(): Promise<PublicProgram[]> {
   const response = await fetch(`${API_BASE_URL}/programs`);
   const body = await parseResponse<PublicProgram[]>(response);
+  return body.data || [];
+}
+
+// --- Projects ---
+
+export interface PublicProject {
+  id: number;
+  title: string;
+  slug: string;
+  donor: string | null;
+  location: string | null;
+  sector: string | null;
+  status: "planned" | "ongoing" | "completed";
+  beneficiaries: string | null;
+  description: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  program_id: number | null;
+}
+
+export async function fetchProjects(): Promise<PublicProject[]> {
+  const response = await fetch(`${API_BASE_URL}/projects`);
+  const body = await parseResponse<PublicProject[]>(response);
+  return body.data || [];
+}
+
+// --- Gallery ---
+
+export interface PublicGalleryImage {
+  id: number;
+  category: string;
+  image_url: string;
+  alt_text: string | null;
+  caption: string | null;
+  display_order: number;
+  program_id: number | null;
+}
+
+export async function fetchGallery(): Promise<PublicGalleryImage[]> {
+  const response = await fetch(`${API_BASE_URL}/gallery`);
+  const body = await parseResponse<PublicGalleryImage[]>(response);
+  return body.data || [];
+}
+
+// --- Team members ---
+
+export interface PublicTeamMember {
+  id: number;
+  name: string;
+  designation: string | null;
+  department: string | null;
+  bio: string | null;
+  photo_url: string | null;
+  email: string | null;
+  linkedin_url: string | null;
+  display_order: number;
+}
+
+export async function fetchTeamMembers(): Promise<PublicTeamMember[]> {
+  const response = await fetch(`${API_BASE_URL}/team-members`);
+  const body = await parseResponse<PublicTeamMember[]>(response);
+  return body.data || [];
+}
+
+// --- Partners ---
+
+export interface PublicPartner {
+  id: number;
+  name: string;
+  logo_url: string | null;
+  website_url: string | null;
+  description: string | null;
+  partner_type: string;
+  display_order: number;
+}
+
+export async function fetchPartners(): Promise<PublicPartner[]> {
+  const response = await fetch(`${API_BASE_URL}/partners`);
+  const body = await parseResponse<PublicPartner[]>(response);
   return body.data || [];
 }
 

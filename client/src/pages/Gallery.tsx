@@ -1,72 +1,50 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ImageIcon } from "lucide-react";
 import Seo from "@/components/Seo";
+import { fetchGallery, type PublicGalleryImage } from "@/lib/shds-api";
 
-type GalleryImage = {
-  file: string;
-  alt: string;
-  caption: string;
+// Optional nicer subtitles for known categories — the backend only stores
+// a flat category string per image, so any category not listed here still
+// renders fine with just its name as the heading.
+const CATEGORY_DESCRIPTIONS: Record<string, string> = {
+  "Education Programs": "Children learning and growing in our education initiatives",
+  "Health & Nutrition": "Community health awareness and maternal care programs",
+  "WASH Initiatives": "Water, sanitation, and hygiene projects in rural communities",
+  "Women Empowerment": "Women's groups, training, and community participation",
+  "Disaster Response": "Emergency relief and rehabilitation efforts",
+  "Community Engagement": "Community mobilization and social development activities",
 };
 
-export default function Gallery() {
-  const galleryCategories: { title: string; description: string; images: GalleryImage[] }[] = [
-    {
-      title: "Education Programs",
-      description: "Children learning and growing in our education initiatives",
-      images: [
-        { file: "education-1.jpg", alt: "Classroom learning session", caption: "Non-formal education in progress" },
-        { file: "education-2.jpg", alt: "Girls' education activity", caption: "Empowering girls through education" },
-        { file: "education-3.jpg", alt: "Teacher training workshop", caption: "Teacher capacity building session" },
-      ],
-    },
-    {
-      title: "Health & Nutrition",
-      description: "Community health awareness and maternal care programs",
-      images: [
-        { file: "health-1.jpg", alt: "Health awareness session", caption: "Community health education" },
-        { file: "health-2.jpg", alt: "Nutrition program", caption: "Nutrition support for children" },
-        { file: "health-3.jpg", alt: "Health camp", caption: "Community health camp" },
-      ],
-    },
-    {
-      title: "WASH Initiatives",
-      description: "Water, sanitation, and hygiene projects in rural communities",
-      images: [
-        { file: "wash-1.jpg", alt: "Water point installation", caption: "Safe water point for community" },
-        { file: "wash-2.jpg", alt: "Hygiene promotion", caption: "Hygiene awareness campaign" },
-        { file: "wash-3.jpg", alt: "Latrine construction", caption: "Community sanitation facility" },
-      ],
-    },
-    {
-      title: "Women Empowerment",
-      description: "Women's groups, training, and community participation",
-      images: [
-        { file: "women-1.jpg", alt: "Women's group meeting", caption: "Women's community organization meeting" },
-        { file: "women-2.jpg", alt: "Skills training", caption: "Vocational skills training for women" },
-        { file: "women-3.jpg", alt: "Women leaders", caption: "Women leaders in community decision-making" },
-      ],
-    },
-    {
-      title: "Disaster Response",
-      description: "Emergency relief and rehabilitation efforts",
-      images: [
-        { file: "disaster-1.jpg", alt: "Flood relief distribution", caption: "Emergency relief distribution" },
-        { file: "disaster-2.jpg", alt: "School rehabilitation", caption: "School rehabilitation after disaster" },
-        { file: "disaster-3.jpg", alt: "Community support", caption: "Supporting affected communities" },
-      ],
-    },
-    {
-      title: "Community Engagement",
-      description: "Community mobilization and social development activities",
-      images: [
-        { file: "community-1.jpg", alt: "Community gathering", caption: "Community mobilization session" },
-        { file: "community-2.jpg", alt: "Volunteer training", caption: "Community volunteer training" },
-        { file: "community-3.jpg", alt: "Community event", caption: "Community development activity" },
-      ],
-    },
-  ];
+function groupByCategory(images: PublicGalleryImage[]) {
+  const order: string[] = [];
+  const groups = new Map<string, PublicGalleryImage[]>();
+  for (const image of images) {
+    if (!groups.has(image.category)) {
+      groups.set(image.category, []);
+      order.push(image.category);
+    }
+    groups.get(image.category)!.push(image);
+  }
+  return order.map((category) => ({
+    category,
+    images: groups.get(category)!.sort((a, b) => a.display_order - b.display_order),
+  }));
+}
 
+export default function Gallery() {
+  const [images, setImages] = useState<PublicGalleryImage[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchGallery()
+      .then(setImages)
+      .catch(() => setImages(null))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const categories = images ? groupByCategory(images) : [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -74,8 +52,8 @@ export default function Gallery() {
       {/* Header */}
       <section className="bg-gradient-to-r from-[#2d8659] to-[#1e5a96] text-white py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-6xl">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">Gallery</h1>
-          <p className="text-xl text-blue-100 max-w-2xl">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">Gallery</h1>
+          <p className="text-lg sm:text-xl text-blue-100 max-w-2xl">
             Visual stories from our field work across Sindh
           </p>
         </div>
@@ -84,28 +62,40 @@ export default function Gallery() {
       {/* Gallery Content */}
       <section className="py-16 md:py-24 bg-gray-50">
         <div className="container mx-auto px-4 max-w-6xl">
-          <div className="space-y-16">
-            {galleryCategories.map((category, catIdx) => (
-              <div key={catIdx}>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">{category.title}</h2>
-                <p className="text-gray-600 text-lg mb-8">{category.description}</p>
+          {isLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="aspect-square w-full rounded-2xl" />
+              ))}
+            </div>
+          ) : categories.length === 0 ? (
+            <p className="text-center text-gray-600 py-16">Photos will be added here soon.</p>
+          ) : (
+            <div className="space-y-16">
+              {categories.map(({ category, images: categoryImages }) => (
+                <div key={category}>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{category}</h2>
+                  {CATEGORY_DESCRIPTIONS[category] && (
+                    <p className="text-gray-600 text-base sm:text-lg mb-8">{CATEGORY_DESCRIPTIONS[category]}</p>
+                  )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {category.images.map((image, imgIdx) => (
-                    <GalleryCard key={imgIdx} image={image} />
-                  ))}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
+                    {categoryImages.map((image) => (
+                      <GalleryCard key={image.id} image={image} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
       {/* Call to Action */}
       <section className="py-16 md:py-24 bg-gradient-to-r from-[#2d8659] to-[#1e5a96] text-white">
         <div className="container mx-auto px-4 max-w-4xl text-center">
-          <h2 className="text-4xl font-bold mb-6">Want to See More?</h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-6">Want to See More?</h2>
+          <p className="text-lg sm:text-xl text-blue-100 mb-8">
             For more detailed case studies, field reports, and photography, please reach out to our team directly.
           </p>
         </div>
@@ -114,9 +104,9 @@ export default function Gallery() {
   );
 }
 
-function GalleryCard({ image }: { image: GalleryImage }) {
+function GalleryCard({ image }: { image: PublicGalleryImage }) {
   const [failed, setFailed] = useState(false);
-  const src = `/images/gallery/${image.file}`;
+  const label = image.alt_text || image.caption || image.category;
 
   return (
     <Card
@@ -128,8 +118,8 @@ function GalleryCard({ image }: { image: GalleryImage }) {
       <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 relative group overflow-hidden">
         {!failed ? (
           <img
-            src={src}
-            alt={image.alt}
+            src={image.image_url}
+            alt={label}
             onError={() => setFailed(true)}
             className="absolute inset-0 w-full h-full object-cover
 group-hover:scale-110 transition-transform duration-500"
@@ -145,13 +135,17 @@ translate-y-3 opacity-0
 group-hover:translate-y-0
 group-hover:opacity-100
 transition-all duration-300">
-            {image.alt}
+            {label}
           </p>
         </div>
       </div>
-      <div className="p-4 bg-white group-hover:bg-green-50 transition-colors duration-300">
-        <p className="text-gray-700 font-medium group-hover:text-[#2d8659] transition-colors duration-300">{image.caption}</p>
-      </div>
+      {image.caption && (
+        <div className="p-4 bg-white group-hover:bg-green-50 transition-colors duration-300">
+          <p className="text-gray-700 font-medium group-hover:text-[#2d8659] transition-colors duration-300">
+            {image.caption}
+          </p>
+        </div>
+      )}
     </Card>
   );
 }

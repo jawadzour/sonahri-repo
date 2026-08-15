@@ -13,8 +13,18 @@ import {
   Leaf,
 } from "lucide-react";
 import Seo from "@/components/Seo";
+import { useEffect, useState } from "react";
+import { fetchPartners, type PublicPartner } from "@/lib/shds-api";
 
 export default function Home() {
+  const [partners, setPartners] = useState<PublicPartner[] | null>(null);
+
+  useEffect(() => {
+    fetchPartners()
+      .then((data) => setPartners([...data].sort((a, b) => a.display_order - b.display_order)))
+      .catch(() => setPartners(null));
+  }, []);
+
   const impactStats = [
     {
       icon: Heart,
@@ -371,6 +381,37 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Partners */}
+      {partners && partners.length > 0 && (
+        <section className="py-12 md:py-16 bg-white border-t border-gray-100">
+          <div className="container mx-auto px-4 max-w-6xl">
+            <p className="text-center text-sm font-semibold tracking-wide uppercase text-gray-500 mb-8">
+              Our Partners
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
+              {partners.map((partner) =>
+                partner.logo_url ? (
+                  <a
+                    key={partner.id}
+                    href={partner.website_url ?? undefined}
+                    target={partner.website_url ? "_blank" : undefined}
+                    rel={partner.website_url ? "noopener noreferrer" : undefined}
+                    title={partner.name}
+                    className="grayscale hover:grayscale-0 opacity-70 hover:opacity-100 transition-all duration-300"
+                  >
+                    <img src={partner.logo_url} alt={partner.name} className="h-10 sm:h-12 w-auto object-contain" />
+                  </a>
+                ) : (
+                  <span key={partner.id} className="text-gray-600 font-medium text-sm sm:text-base">
+                    {partner.name}
+                  </span>
+                )
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Call to Action */}
       <section className="py-16 md:py-24 bg-gradient-to-r from-[#2d8659] to-[#1e5a96] text-white">

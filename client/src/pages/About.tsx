@@ -1,8 +1,21 @@
 import { Card } from "@/components/ui/card";
-import { Eye, Target, Heart, CheckCircle2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Eye, Target, Heart, CheckCircle2, Linkedin, UserRound } from "lucide-react";
 import Seo from "@/components/Seo";
+import { useEffect, useState } from "react";
+import { fetchTeamMembers, type PublicTeamMember } from "@/lib/shds-api";
 
 export default function About() {
+  const [team, setTeam] = useState<PublicTeamMember[] | null>(null);
+  const [isTeamLoading, setIsTeamLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTeamMembers()
+      .then((members) => setTeam([...members].sort((a, b) => a.display_order - b.display_order)))
+      .catch(() => setTeam(null))
+      .finally(() => setIsTeamLoading(false));
+  }, []);
+
   const coreValues = [
     { title: "Equity", description: "We prioritize those who are furthest behind, with special attention to women, children, and disaster-affected communities." },
     { title: "Transparency", description: "Our work is governed by accountability to the communities we serve, our partners, and our donors." },
@@ -150,6 +163,58 @@ export default function About() {
           </div>
         </div>
       </section>
+
+      {/* Meet Our Team */}
+      {(isTeamLoading || (team && team.length > 0)) && (
+        <section className="py-16 md:py-24 bg-gray-50">
+          <div className="container mx-auto px-4 max-w-6xl">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-gray-900 text-center">Meet Our Team</h2>
+
+            {isTeamLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-64 w-full rounded-2xl" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {team!.map((member) => (
+                  <Card
+                    key={member.id}
+                    className="group p-6 bg-white border-2 border-[#2d8659] rounded-2xl shadow-md text-center
+  hover:border-orange-500 hover:bg-green-50 hover:shadow-xl
+  hover:-translate-y-2 transition-all duration-300"
+                  >
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden bg-gray-100 border-2 border-[#2d8659]/30 flex items-center justify-center">
+                      {member.photo_url ? (
+                        <img src={member.photo_url} alt={member.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <UserRound className="w-10 h-10 text-gray-400" />
+                      )}
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900">{member.name}</h3>
+                    {member.designation && (
+                      <p className="text-[#2d8659] font-semibold text-sm mb-1">{member.designation}</p>
+                    )}
+                    {member.department && <p className="text-gray-500 text-xs mb-3">{member.department}</p>}
+                    {member.bio && <p className="text-gray-700 text-sm leading-relaxed mb-3">{member.bio}</p>}
+                    {member.linkedin_url && (
+                      <a
+                        href={member.linkedin_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-[#1e5a96] text-sm font-medium hover:underline"
+                      >
+                        <Linkedin className="w-4 h-4" /> LinkedIn
+                      </a>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* What Drives Us */}
       <section className="py-16 md:py-24 bg-gradient-to-r from-[#2d8659] to-[#1e5a96] text-white">

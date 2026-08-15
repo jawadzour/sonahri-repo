@@ -32,9 +32,22 @@ export const programsConfig: ResourceConfig<Program> = {
   fields: [
     { name: "title", label: "Title", type: "text", required: true, colSpan: 2 },
     { name: "slug", label: "Slug", type: "text", required: true, placeholder: "education-nutrition" },
-    { name: "icon", label: "Icon name", type: "text", placeholder: "GraduationCap (lucide icon)" },
+    {
+      name: "icon",
+      label: "Icon name",
+      type: "text",
+      placeholder: "BookOpen",
+      description:
+        "One of: AlertTriangle, Baby, BookOpen, Briefcase, Building2, Droplet, Droplets, Globe, GraduationCap, HandHeart, Handshake, Heart, HeartHandshake, Home, Leaf, MapPin, School, Shield, Sprout, Stethoscope, TreePine, UserCheck, Users, Zap. Unrecognized names fall back to a default icon.",
+    },
     { name: "summary", label: "Short summary", type: "textarea", colSpan: 2 },
-    { name: "description", label: "Full description", type: "richtext", colSpan: 2 },
+    {
+      name: "description",
+      label: "Full description",
+      type: "richtext",
+      colSpan: 2,
+      description: "Plain text. Prefix a line with \"- \" to render it as a bullet in the Key Activities list.",
+    },
     { name: "display_order", label: "Display order", type: "number" },
     { name: "is_active", label: "Active on website", type: "boolean" },
   ],
